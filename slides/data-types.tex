@@ -1,0 +1,353 @@
+\section{Data types}
+
+\begin{frame}
+  \frametitle{Introduction}
+
+  So far, we have only considered two sorts of data types: $\enum{}$
+  and $\estr{}$.
+  % 
+  Most programming languages allow ``\emph{complex}'' types.
+
+  \bigskip
+
+  Examples?
+  
+\end{frame}
+
+
+\note{This part is adapted from Chapters 10 and 11 of PFPL.}
+
+
+\subsection{Binary product}
+
+\begin{frame}
+  \frametitle{Syntax}
+
+  A language with binary \emph{product}.
+
+  \[
+  \begin{array}{llclll}
+    \TYPES & \tau & \Coloneqq &  \ldots {\color{gray} (\text{as in } \lggeEF)}
+    \\
+    % &&& \tyunit  & \tyunit & \text{nullary product}
+    % \\
+           &&& \typrod{\tau_1}{\tau_2} & \tau_1 {\times} \tau_2 & \text{binary product} 
+    \\
+    \\
+    \EXPS & e & \Coloneqq &  \ldots {\color{gray} (\text{as in } \lggeEF)}
+    \\
+    % &&& \etriv & \ctriv & \text{null tuple}
+    % \\
+           &&& \epair{e_1}{e_2} & \cpair{e_1}{e_2}  & \text{ordered pair}
+    \\
+           &&& \eprl{e} & \cprl{e} & \text{left projection}
+    \\
+           &&& \eprr{e} & \cprr{e} & \text{right projection}
+  \end{array}
+  \]
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Statics}
+  % \[
+  % \tyrule
+  % {\etyrulename{u}}
+  % {\,}
+  % {\tyjudge{\Gamma}{\etriv}{\tyunit} }
+  % \]
+  \[
+  \tyrule
+  {\etyrulename{prod}}
+  {\tyjudge{\Gamma}{e_1}{{\tau_1}}
+    \and
+    \tyjudge{\Gamma}{e_2}{{\tau_2}}
+  }
+  {\tyjudge{\Gamma}{\epair{e_1}{e_2}}{\typrod{\tau_1}{\tau_2}}}
+  \]
+  \pause
+  \bigskip
+  \[
+  \tyrule
+  {\etyrulename{pl}}
+  {\tyjudge{\Gamma}{e}{\typrod{\tau_1}{\tau_2}}
+  }
+  {\tyjudge{\Gamma}{\eprl{e}}{\tau_1}} 
+  \qquad\qquad\quad
+  \tyrule
+  {\etyrulename{pr}}
+  {\tyjudge{\Gamma}{e}{\typrod{\tau_1}{\tau_2}}
+  }
+  {\tyjudge{\Gamma}{\eprr{e}}{\tau_2}} 
+  \]
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Examples}
+  Find the type for the following terms, if possible.
+
+  \begin{itemize}
+  \item $\epair{\enum{2}}{\estr{\text{hello}}}$
+  \item $\eprl{\epair{\enum{2}}{\estr{\text{hello}}}}$
+  \item $\elam{\typrod{\enum{}}{\estr{}}}{x}{\epair{\eprr{x}}{\eprl{x}}}$
+  \item $\eapp{\elam{\typrod{\enum{}}{\estr{}}}{x}{\epair{\eprr{x}}{\eprl{x}}}}{\etriv}$
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Dynamics (lazy)}
+  
+  \[
+  % \semrule{}
+  % {\,}
+  % {\valjudge{\etriv}}
+  % \qquad\qquad\quad
+  \semrule{}
+  {\,
+    % \valjudge{e_1} \and \valjudge{e_2}
+  }
+  { \valjudge{\epair{e_1}{e_2}} }
+  \]
+  
+
+  \[
+  \semrule
+  {\esemrulename{pll}}
+  {\jtrans{e}{e'}}
+  {\jtrans{\eprl{e}}{\eprl{e'}}}
+  \qquad\qquad\quad
+  \semrule
+  {\esemrulename{plr}}
+  {\jtrans{e}{e'}}
+  {\jtrans{\eprr{e}}{\eprr{e'}}}
+  \]
+
+  \[
+  \semrule
+  {\esemrulename{pll}}
+  {\,}
+  {\jtrans{\eprl{\epair{e_1}{e_2}}}{{e_1}}}
+ \qquad\qquad
+  \semrule
+  {\esemrulename{plr}}
+  {\,}
+  {\jtrans{\eprr{\epair{e_1}{e_2}}}{{e_2}}}
+  \]
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Examples}
+  Evaluate the following terms, if they can be assigned a type.
+  % 
+  \begin{itemize}
+  \item $\epair{\enum{2}}{\estr{\text{hello}}}$
+  \item $\eprl{\epair{\enum{2}}{\estr{\text{hello}}}}$
+  \item $\elam{\typrod{\enum{}}{\estr{}}}{x}{\epair{\eprr{x}}{\eprl{x}}}$
+  \item $\eapp{\elam{\typrod{\enum{}}{\estr{}}}{x}{\epair{\eprr{x}}{\eprl{x}}}}{\etriv}$
+  \end{itemize}
+
+\end{frame}
+
+
+
+\subsection{Nullary and binary sum}
+
+\begin{frame}
+  \frametitle{Syntax}
+
+  A language with nullary and binary \emph{sum}.
+
+  \[
+  \begin{array}{llclll}
+    \TYPES & \tau & \Coloneqq &  \ldots {\color{gray} (\text{as in } \lggeEF)}
+    % \\
+    %        &&& \tyvoid  & \tyvoid & \text{nullary sum}
+    \\
+           &&& \tysum{\tau_1}{\tau_2} & \tau_1 {+} \tau_2 & \text{binary sum} 
+    \\
+    \\
+    \EXPS & e & \Coloneqq &  \ldots {\color{gray} (\text{as in } \lggeEF)}
+    \\
+    %        &&& \eabort{\tau}{e} & \cabort{e} & \text{abort}
+    % \\
+           &&& \einl{\tau_1}{\tau_2}{e} & \cinl{e}  & \text{left injection}
+    \\
+           &&&  \einr{\tau_1}{\tau_2}{e} & \cinr{e}  & \text{right injection}
+    \\
+           &&& \ecase{e}{x_1}{e_1}{x_2}{e_2} & \text{\tiny[see below]} & \text{case analysis}
+  \end{array}
+  \]
+
+  Concrete form for case analysis: $\ccase{e}{x_1}{e_1}{x_2}{e_2}$
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Statics}
+
+  % \[
+  % \tyrule
+  % {\etyrulename{u}}
+  % {\tyjudge{\Gamma}{e}{\tyvoid}}
+  % {\tyjudge{\Gamma}{\eabort{\tau}{e}}{\tau}}
+  % \]
+
+  \[
+  \tyrule
+  {\etyrulename{inl}}
+  {
+    \tyjudge{\Gamma}{e_1}{{\tau_1}}
+  }
+  {\tyjudge{\Gamma}{\einl{\tau_1}{\tau_2}{e}}{\tysum{\tau_1}{\tau_2}}}
+  \]
+
+  \[
+  \tyrule
+  {\etyrulename{inr}}
+  {
+    \tyjudge{\Gamma}{e_2}{{\tau_2}}
+  }
+  {\tyjudge{\Gamma}{\einr{\tau_1}{\tau_2}{e}}{\tysum{\tau_1}{\tau_2}}}
+  \]
+
+
+  \[
+  \tyrule
+  {\etyrulename{cs}}
+  {
+    \tyjudge{\Gamma}{e}{\tysum{\tau_1}{\tau_2}}
+    \and
+    \tyjudge{\Gamma, \var{x_1}: {\tau_1}}{e_1}{\tau}
+    \and
+    \tyjudge{\Gamma, \var{x_2}: {\tau_2}}{e_2}{\tau}
+  }
+  {
+    \tyjudge{\Gamma}
+    {
+      \ecase{e}{x_1}{e_1}{x_2}{e_2}
+    }
+    {\tau}
+  }
+  \]
+
+  \bigskip
+
+  Can we relax rule [\etyrulename{cs}] so that branches have
+  different types?
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Dynamics (eager)}
+
+  
+  \[
+  \semrule{}
+  {\valjudge{e}}
+  {\valjudge{\einr{\tau_1}{\tau_2}{e}}}
+  \qquad\qquad\quad
+  \semrule{\etyrulename{ir}}
+  {\jtrans{e}{e'}}
+  {\jtrans{\einr{\tau_1}{\tau_2}{e}}{\einr{\tau_1}{\tau_2}{e'}}}
+  \]
+  
+
+
+
+  \[
+  \semrule{\etyrulename{inl}}
+  {\valjudge{e}}
+  {
+    \jtrans{\ecase{\einl{\tau_1}{\tau_2}{e}}{x_1}{e_1}{x_2}{e_2}}
+    {\subs{e_1}{e}{x_1}}
+  }
+  \]
+
+  \[
+  \semrule{\etyrulename{inr}}
+  {\valjudge{e}}
+  {
+    \jtrans{\ecase{\einr{\tau_1}{\tau_2}{e}}{x_1}{e_1}{x_2}{e_2}}
+    {\subs{e_2}{e}{x_2}}
+  }
+  \]
+
+
+  \bigskip
+  
+
+  Anything missing?
+\end{frame}
+
+
+\subsection{Discussion}
+
+\begin{frame}
+  \frametitle{Constructors}
+  We distinguish two sorts of type \emph{constructors}
+  \begin{itemize}
+  \item \emph{Introduction} forms construct a new term of the expected
+    type, e.g., $\epair{e_1}{e_2}$ for binary products and
+    $\einl{\tau_1}{\tau_2}{e_1}$ for binary sums.
+    % 
+  \item \emph{Elimination} forms destruct a term of a give type into a
+    ``smaller'' type, e.g., $\eprl{e}$ for binary sums and
+    $\ecase{e}{x_1}{e_1}{x_2}{e_2}$ for binary sums.
+  \end{itemize}
+
+  \bigskip
+
+  Any other example?
+  
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Exercises}
+  Define the functions (in $\lggeEF$ with pairs and sums) that meet
+  the following specification:
+  \begin{itemize}
+  \item A function that \emph{adds} the content of the pairs:
+    $\text{addpair} \defi \clam{\typrod{\enum{}}{\enum{}}}{x}{\eplus{\cprl{x}}{\cprr{x}}}$. Observe that $\text{addpair}$ has type $\tyarr{\typrod{\enum{}}{\enum{}}}{\enum{}}$.
+    % 
+  \item A function that \emph{flips} the content of a pair (e.g.,
+    $\cpair{1}{2}$ becomes $\cpair{2}{1}$)
+    % 
+  \item A function that takes \emph{either} a string or a number as a
+    parameter and returns the length of the string if the argument is
+    a string, or the square of the argument if it's a number.
+    % 
+  \item A function of type
+    $\tyarr{\tysum{\tau_1}{\tau_1}}{\tyarr{\tau_2}{\tyarr{\tau_2}{\tau_2}}}$,
+    or, equivalently,
+    $ (\tau_1 {+} \tau_1) \rightarrow \tau \rightarrow \tau
+    \rightarrow \tau$
+    (three parameters), which returns its second argument if its first
+    is $\cinl{e}$ and returns its third argument if its first is
+    $\cinr{e}$ (for some $e$).
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Applications and generalisations}
+  \begin{itemize}
+  \item Records 
+  \item Labelled variants
+  \item Optional types with binary sums
+  \item Booleans
+  \item $n$-ary sums and products
+  \end{itemize}
+\end{frame}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

@@ -1,0 +1,333 @@
+\documentclass[11pt]{article}
+\usepackage[top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{xcolor}
+% 
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ifthen}
+\usepackage{mathpartir}
+\usepackage{mathtools}
+\input{../../slides/macros}
+% 
+
+\newcommand{\HL}[1]{\boxed{#1}}
+
+
+\begin{document}
+
+\title{CO663 Part II: Worksheet 4 (\emph{assessed})}
+
+\date{\vspace{-15ex}} 
+\maketitle
+
+% \pagenumbering{gobble}
+
+\newcommand{\lazyeval}[1]{\framebox{\parbox[c][#1]{\textwidth}{
+      \color{white}{h}% 
+    }}}
+
+
+\section{Introduction}
+
+The objective of this class is to put in practice the concepts of
+programming language design by adding \emph{lists} to language
+$\lggeT$.
+% 
+This is an individual exercise.
+
+\begin{center}
+  \emph{This class assessment is worth {\color{red} 3} marks.}
+\end{center}
+
+Submit your work via \emph{Moodle} (within the deadline specified on the
+Moodle page).
+
+
+\section{Syntax} 
+
+Here is the syntax for $\lggeT$ with lists (new parts of \HL{highlighted}).
+
+\[
+\begin{array}{llclll}
+  \TYPES & \tau & \Coloneqq & \tynat  & \tynat & \text{natural}
+  \\
+         &&& \HL{\tylist{\tau}} &  \HL{ [\tau] } & \text{lists}
+  \\
+         &&& \tyarr{\tau_1}{\tau_2}  & \tau_1 \rightarrow \tau_2 & \text{function}
+  \\
+  \\ 
+  \EXPS & e & \Coloneqq & \var{x} & \var{x} & \text{variable}
+  \\
+         &&& \ez &  \ez & \text{zero}
+  \\
+         &&& \esucc{e} &  \esucc{e} & \text{successor}
+  \\
+         &&& \elam{\tau}{x}{e} & \clam{\tau}{x}{e} & \text{abstraction}
+  \\
+         &&& \eapp{e_1}{e_2} & \capp{e_1}{e_2} & \text{application}
+  \\
+         &&& \eiter{e_0}{x}{e_1}{e} & {\citer{e_0}{x}{e_1}{e}}   & \text{iterator}
+  \\
+         &&& \HL{[\,]} & \HL{[\,]} & \text{empty list}
+  \\
+         &&& \HL{\econs{e}{e'}} & \HL{\ccons{e}{e'}} & \text{list constructor}
+  \\                                   
+         &&& \HL{\edeclist{e_0}{x}{y}{e_1}{e}} & \HL{{\cdeclist{e_0}{x}{y}{e_1}{e}}}   &\text{list deconstructor}
+\end{array}
+\]
+
+The construct $\econs{e}{e'}$ simply builds a new list from an element
+$e$ and another list $e'$ by adding $e$ at the front of $e'$.
+%
+The construct $\edeclist{e_0}{x}{y}{e_1}{e}$ is a
+\emph{binder} which introduces two new variables ($\var{x}$ and
+$\var{y}$).
+%
+This construct should behave differently when $e$ is the empty list
+(behave as $e_0$). If $e$ is non-empty, then it is divided into a head
+(bound to $\var{x}$) and a tail (bound to $\var{y}$).
+
+\section{Exercise 1: add typing rules for the new syntax constructs}
+Here are the typing rules for $\lggeT$, add new rules to support lists.
+\[
+\tyrule
+{\ttyrulename{var}}
+{\,}
+{\tyjudge{\Gamma_1, \var{x}: \tau, \Gamma_2}{\var{x}}{\tau} }
+\qquad\qquad\qquad
+\tyrule
+{\ttyrulename{nat}}
+{\,}
+{\tyjudge{\Gamma}{\ez}{\tynat}}
+\qquad\qquad\qquad
+\tyrule
+{\ttyrulename{num}}
+{\tyjudge{\Gamma}{{e}}{\tynat{}}}
+{\tyjudge{\Gamma}{\esucc{e}}{\tynat{}}}
+\]
+% 
+\[
+\tyrule
+{\ttyrulename{lam}}
+{\tyjudge{\Gamma, \var{x} : \tau_1}{e}{\tau_2}}
+{\tyjudge{\Gamma}{\elam{\tau_1}{x}{e}}{\tyarr{\tau_1}{\tau_2}}}
+\qquad\qquad\qquad
+\tyrule
+{\ttyrulename{ap}}
+{
+  \tyjudge{\Gamma}{e_1}{\tyarr{\tau_1}{\tau}}
+  \and
+  \tyjudge{\Gamma}{e_2}{\tau_1}
+}
+{
+  \tyjudge{\Gamma}{\eapp{e_1}{e_2}}{\tau}
+}
+\]
+\[
+\tyrule
+{\ttyrulename{ite}}
+{
+  \tyjudge{\Gamma}{e}{\tynat}
+  \and
+  \tyjudge{\Gamma}{e_0}{\tau}
+  \and
+  \tyjudge{\Gamma, \var{x} : \tau}{e_1}{\tau}
+}
+{
+  \tyjudge{\Gamma}{\eiter{e_0}{x}{e_1}{e}}{\tau}
+}
+\]
+
+
+\section{Exercise 2: add semantic rules for the new syntax constructs}
+
+
+Here are the evaluation rules for $\lggeT$, add new rules to support lists.
+
+% \subsection{Values}
+\[
+\semrule{\tsemrulename{z}}
+{\,}
+{\valjudge{\ez}}
+\qquad \qquad  \qquad
+\semrule{\tsemrulename{s}}
+{\valjudge{e}}
+{\valjudge{\esucc{e}}}
+\qquad \qquad  \qquad
+\semrule
+{\tsemrulename{lam}}
+{\,}
+{\valjudge{\elam{\tau}{x}{e}}}
+\]
+
+
+
+% \subsection{Reductions}
+
+\[
+\semrule
+{\tsemrulename{ss}}
+{\jtrans{e}{e'}}
+{
+  \jtrans{\esucc{e}}{\esucc{e'}}
+}
+\qquad \qquad  \qquad
+% 
+\semrule
+{\tsemrulename{ap}}
+{\jtrans{e_1}{e'_1}}
+{
+  \jtrans{\eapp{e_1}{e_2}}{\eapp{e'_1}{e_2}}
+}
+\]
+% 
+% 
+\[
+\semrule
+{\tsemrulename{lan}}
+{\valjudge{e_1} 
+  \and \jtrans{e_2}{e'_2}
+}
+{\jtrans{\eapp{e_1}{e_2}}{\eapp{e_1}{e'_2}}}
+\qquad \qquad  \qquad
+\semrule
+{\tsemrulename{lav}}
+{\valjudge{e_2}}
+{\jtrans{\eapp{\elam{\tau}{x}{e_1}}{e_2}}{\subs{e_1}{e_2}{x}}}
+\]
+% 
+\[
+\semrule
+{\tsemrulename{rin}}
+{\jtrans{e}{e'}}
+{
+  \jtrans{\eiter{e_0}{x}{e_1}{e}}{\eiter{e_0}{x}{e_1}{e'}}
+}
+\qquad \qquad  \qquad
+% 
+\semrule
+{\tsemrulename{r0}}
+{\,}
+{
+  \jtrans{\eiter{e_0}{x}{e_1}{\ez}}{e_0}
+}
+% 
+\]
+\[
+%  
+\semrule
+{\tsemrulename{rs}} 
+{\valjudge{{e}}}
+{
+  \jtrans{\eiter{e_0}{x}{e_1}{\esucc{e}}}{\subs{e_1}{{\eiter{e_0}{x}{e_1}{{e}}}}{x}}
+}
+\]
+
+
+\section*{\LaTeX\ template}
+The \LaTeX\ sources of this document are available in:
+\url{https://github.com/ukc-co663/pl-design-latex-template}.
+
+% \end{document}
+
+\section{Model answer}
+
+\subsection{Typing rules}
+\[
+\tyrule
+{\ttyrulename{dlist}}
+{
+  \tyjudge{\Gamma}{e}{\tylist{\tau}}
+  \and
+  \tyjudge{\Gamma}{e_0}{\tau'}
+  \and
+  \tyjudge{\Gamma, \var{x} : \tau, \var{y}: {\tylist{\tau}}}{e_1}{\tau'}
+}
+{
+  \tyjudge{\Gamma}{\edeclist{e_0}{x}{y}{e_1}{e}}{\tau'}
+}
+\]
+
+
+
+\[
+\tyrule
+{\ttyrulename{e}}
+{\,}
+{
+  \tyjudge{\Gamma}{[\,]}{\tylist{\tau}}
+}
+\qquad \qquad  \qquad \qquad
+\tyrule
+{\ttyrulename{cons}}
+{
+  \tyjudge{\Gamma}{e}{{\tau}}
+  \and
+  \tyjudge{\Gamma}{e'}{\tylist{\tau}}
+}
+{
+  \tyjudge{\Gamma}{\econs{e}{e'}}{\tylist{\tau}}
+}
+\]
+
+
+\subsection{Semantic rules}
+
+\[
+\semrule{\tsemrulename{cons}}
+{\valjudge{e}
+  \and 
+  \valjudge{e'}
+}
+{\valjudge{\econs{e}{e'}}}
+\qquad \qquad  \qquad \qquad
+\semrule{\tsemrulename{empty}}
+{\,
+}
+{\valjudge{[\,]}}
+\]
+
+\[
+\semrule
+{\tsemrulename{cin}}
+{\jtrans{e}{e'}}
+{
+  \jtrans{\edeclist{e_0}{x}{y}{e_1}{e}}{\edeclist{e_0}{x}{y}{e_1}{e'}}
+}
+\qquad \qquad  \qquad
+% 
+\semrule
+{\tsemrulename{c0}}
+{\,}
+{ 
+  \jtrans{\edeclist{e_0}{x}{y}{e_1}{[\,]}}{e_0}
+}
+% 
+\]
+\[
+%  
+\semrule
+{\tsemrulename{cs}}
+{\,}
+{
+  \jtrans{\edeclist{e_0}{x}{y}{e_1}{\econs{e}{e'}}}
+  {\twosubs
+    {e_1}
+    {e}{x}
+    {e'}{y}
+  }
+}
+\]
+
+
+\end{document}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

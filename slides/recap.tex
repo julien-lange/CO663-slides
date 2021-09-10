@@ -1,0 +1,41 @@
+\begin{frame}
+  \frametitle{Feedback from Week 19}
+  \begin{itemize}
+  \item Missed lectures: hard to catch up.
+  \item How to break down expressions?
+  \item Difficulty understanding binders (let)
+  \item When to apply plr or pll, and why is there separate rules?
+  \item Whether we should write ``$\valjudge{e}$'' judgements explicitly
+  \item Syntax of substitutions
+  \item Terminology rule names, gamma ($\Gamma$), tau ($\tau$)
+  \item Full definitions of all languages will be on Moodle
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Recap}
+  Judgements covered so far:
+  
+  \bigskip
+  
+  \begin{itemize}
+    \setlength\itemsep{1.5em}
+  \item \emph{Type system:}
+    $\tyjudge{\var{x_1} : \tau_1, \ldots, \var{x_k}:\tau_k}{e}{\tau}$
+    means that, assuming that variable $\var{x_i}$ has type $\tau_i$
+    ($\forall 1 \leq i \leq k$), term $e$ has type $\tau$.
+    % 
+  \item \emph{Semantics (1):} $\valjudge{e}$ means that term $e$ is a \emph{value} (it
+    cannot be evaluated further).
+    % 
+  \item \emph{Semantics (2):} $\jtrans{e}{e'}$ means that term $e$
+    evaluate to term $e'$ (in one step).
+  \end{itemize}
+\end{frame}
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

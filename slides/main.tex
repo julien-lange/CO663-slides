@@ -1,0 +1,327 @@
+\documentclass[compress]{beamer}
+\setbeameroption{show notes}
+%
+%  \documentclass[compress,handout]{beamer}
+%
+%
+%
+%
+% \usepackage{pgfpages}
+% \documentclass[notes]{beamer} 
+% \setbeameroption{show notes on second screen=right}
+
+\definecolor{links}{HTML}{2A1B81}
+\hypersetup{colorlinks,linkcolor=,urlcolor=links}
+\usepackage{etex}
+\usetheme{Pittsburgh}
+% 
+\mode<presentation> 
+\usefonttheme{professionalfonts}
+\usepackage[T1]{fontenc}
+\usepackage{pifont}
+\usepackage{yfonts}
+\usepackage{stmaryrd}
+\usepackage{amsthm} 
+\usepackage{amsmath}
+\usepackage{nicefrac}
+\usepackage{pdfsync}
+\usepackage{url}
+\usepackage{datetime}
+\usepackage{scalerel}
+\usepackage{comment}
+\usepackage{graphicx} 
+\usepackage{ifthen}
+\usepackage{mathtools}
+\usepackage{mathpartir}
+%
+\usepackage{tabularx,booktabs} 
+\usepackage{listings}
+% 
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,automata,backgrounds,petri,positioning,fit,calc,
+  decorations.markings,shadows,fadings,patterns,decorations.pathreplacing,through,decorations.pathmorphing, patterns}
+\tikzset{
+  invisible/.style={opacity=0},
+  visible on/.style={alt={#1{}{invisible}}},
+  alt/.code args={<#1>#2#3}{%
+    \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}} % \pgfkeysalso doesn't change the path
+  },
+}
+\tikzset{cross/.style={cross out, draw, 
+    minimum size=2*(#1-\pgflinewidth), 
+    inner sep=0pt, outer sep=0pt}}
+%\usepackage{mathabx}
+\usepackage{proof} 
+\usepackage{cmll} % for bigwith
+\usepackage{mathtools}
+\usepackage{ulem}
+\usepackage{listings}
+
+\setbeamercolor{background canvas}{bg=cosmiclatte}
+\usepackage{etoolbox}
+
+\newdateformat{monthyeardate}{%
+  \THEYEAR .\THEMONTH .\THEDAY}
+
+\lstset{language=Java,
+basicstyle=\ttfamily\scriptsize,
+commentstyle=\color{pgreen},
+keywordstyle=\color{pblue},
+stringstyle=\color{pred},
+morecomment=[s][\color{pgrey}]{/**}{*/},
+% numbers=left,
+numberstyle=\tiny\color{black},
+stepnumber=2,
+numbersep=10pt,
+tabsize=8,
+showspaces=false,
+showstringspaces=false,
+moredelim=[is][\underline]{_}{_},
+escapeinside={/*<}{>*/}, % Escape to LaTeX
+}
+\tikzstyle{every picture}+=[remember picture]
+
+
+\makeatletter
+\lst@Key{lastline}\relax{\ifnumcomp{#1}{<}{0}{%
+  \let\mylst@file\lst@intname\sbox0{\lstinputlisting{\mylst@file}}%
+  \def\lst@lastline{\the\numexpr#1+\value{lstnumber}-1\relax}}%
+  {\def\lst@lastline{#1\relax}}}
+\makeatother
+
+
+\title[CO663]{CO663 --- Programming Languages: Applications and Design}
+
+
+\author[J. Lange]{
+  {Julien Lange}
+}
+\institute{University of Kent}
+
+\date{2018}
+
+
+\input macros
+
+\begin{document}
+
+
+% \setbeamertemplate{section in toc}[sections numbered]
+% \setbeamertemplate{subsection in toc}[subsections numbered]
+% \AtBeginSection[]
+% {
+%   \begin{frame}
+%     \frametitle{Outline}
+%     % \tableofcontents[currentsection]
+%     % \tableofcontents[hideallsubsections]
+%   \end{frame}
+% }
+
+\setbeamertemplate{navigation symbols}{}%remove navigation symbols
+
+\addtobeamertemplate{navigation symbols}{}{%
+  \usebeamerfont{footline}%
+  \usebeamercolor[fg]{footline}%
+  \hspace{1em}%
+  \insertframenumber % /\inserttotalframenumber
+}
+
+
+{ % these braces make the change local to the single frame
+  \setbeamertemplate{footline}{\vspace{-1cm} {v.\monthyeardate\today{}}}
+  \begin{frame}
+    % 
+    % \titlepage
+    % 
+    \begin{center}
+      
+      \bigskip
+
+      {\large CO663}
+      \\[0.3cm]
+      {\huge Programming Languages: Applications and Design}
+      \\[0.5cm]
+      {\small Part II}
+      \\[2cm]
+      {Julien Lange --- \href{mailto:j.s.lange@kent.ac.uk}{j.s.lange@kent.ac.uk}}
+    \end{center}
+    % 
+  \end{frame}
+}
+
+\input{introduction}
+
+\begin{frame}
+  \frametitle{Exercises}
+  \begin{itemize}
+  \item Language $\lggeE$    
+    \begin{enumerate}
+    \item Syntax in $\lggeE$: slide~\ref{fr:syntax-e}
+    \item Types in $\lggeE$: slide~\ref{fr:types-e}
+    \item Values in $\lggeE$: slide~\ref{fr:value-e}
+    \item Evaluation in $\lggeE$: slide~\ref{fr:evaluate-e}
+    \item Evaluation strategies in $\lggeE$: slide~\ref{fr:srategies-e}
+    \item Add if-then-else to $\lggeE$: slide~\ref{fr:ite-e}
+      
+    \end{enumerate}
+  \item  Language $\lggeEF$
+    \begin{enumerate}  
+    \item Types in $\lggeEF$: slide~\ref{fr:ef-types}
+    \item   Evaluation in $\lggeEF$: slide~\ref{fr:evaluate-ef}
+    \item Types and evaluation in $\lggeEF$:
+      slide~\ref{fr:notype-ef}
+    \item  Evaluation strategies in $\lggeEF$: slide~\ref{fr:eval-strat-ef}
+    \end{enumerate}
+  \item Language $\lggeT$
+    \begin{enumerate}
+    \item Implementing functions in $\lggeT$: slide~\ref{fr:define-t}
+    \end{enumerate}
+
+  \end{itemize}
+\end{frame}
+
+\AtBeginSection[]
+  {
+     \begin{frame}<beamer>
+     \frametitle{Plan}
+     \tableofcontents[currentsection,hideallsubsections]
+     \end{frame}
+  }
+
+
+
+
+
+
+% \begin{frame}
+%   \frametitle{Other references}
+%   \begin{itemize}
+%   \item \url{http://homepages.inf.ed.ac.uk/gdp/publications/sos_jlap.pdf}
+%     % 
+%   \item \url{http://www.cl.cam.ac.uk/teaching/2001/Semantics/}
+%     % 
+%   \item Sections 1 and 2 of ``Featherweight Java: a minimal core
+%     calculus for Java and GJ'' by Igarashi, Pierce, and Wadler.
+%   \item \url{https://www.cs.cornell.edu/andru/classes/oplss12/while.pdf}
+%   \end{itemize}
+% \end{frame}
+
+
+
+% \begin{frame}
+%   \frametitle{Motivation}
+%   \begin{itemize}
+%   \item You might design your own language one day (DSL at least!)
+%   \end{itemize}
+% \end{frame}
+
+
+
+
+% \begin{frame}
+%   \frametitle{Papers}
+%   \begin{itemize}
+%   \item Featherweight Java
+%   \item Intersection types
+%   \item Gradual typing
+%   \item DOT ?
+%   \item John C. Reynolds: Towards a theory of type structure.
+%   \item A modal analysis of staged computation. Davies and Pfennning
+%   \item Intersection types and computational effects
+%   \item Refinement types for ML \url{https://dl.acm.org/citation.cfm?id=113468}
+%   \item Dana Scott
+%   \item Polymorphism, Subtyping, and Type Inference in MLsub
+%   \item Floyd axiomatic semantics
+%   \item Dependent Object Types --- Towards a foundation for Scala's type system
+%   \end{itemize}
+% \end{frame}
+
+
+
+% \begin{frame}
+%   \frametitle{Plan}
+%   \begin{enumerate}
+%   \item Tech intro
+%     \begin{itemize}
+%     \item Capture avoid substitution
+%     \item AST /  ABT
+%     \end{itemize}
+%   \item Language of expressions
+%     \begin{itemize}
+%     \item Types (statics)
+%     \item Semantics (SOS -- dynamics)
+%     \item Type safety
+%     \end{itemize}
+%   \item Language of Higher-order functions (system T)
+%     \begin{itemize}
+%     \item Difference between FO and HO?
+%     \item Semantics
+%     \item Scoping (inc capture avoiding subst? and binding in general?)
+%     \end{itemize}
+%   \item (In-)Finite Data Types
+%     \begin{itemize}
+%     \item (Binary) Product
+%     \item (Binary) Sums (?)
+%     \item Recursive types
+%     \end{itemize}
+%   \item Polymorphism (system F chap 16, based on T) (not generic programming)
+%   \end{enumerate}
+% \end{frame}
+
+
+
+
+
+
+
+
+\input{language-e}
+
+
+
+% \input{cats}
+
+\input{language-ef}
+
+\input{language-t} % strict minimum
+
+\input{data-types}
+
+\input{language-f}
+
+\input{language-w}
+
+\input{language-l}
+
+
+% \separator{Next topic \\ \& \\ Sub next topic}
+
+% \begin{frame}
+%   \frametitle{Summary}
+%   \begin{itemize}
+%   \item Quick overview of what we've seen
+%   \end{itemize}
+% \end{frame}
+
+\separator{The End}
+
+
+\begin{frame}{Acknowledgements}
+  Other source materials / references for these lectures:
+  \begin{itemize}
+  \item \href{https://xavierleroy.org/mpri/2-4/}{Functional
+      programming and type systems}, by Xavier Leroy et al.\ (MPRI)
+  \item \href{http://www.cs.cornell.edu/courses/cs4110/2014fa}{Programming
+      Languages and Logics}, by Nate Foster (Cornell)
+    % 
+  \item \href{https://mitpress.mit.edu/sites/default/files/titles/content/9780262162289_sch_0001.pdf}{Substructural
+      Type System}, by David Walker
+  \end{itemize}
+\end{frame}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

@@ -1,0 +1,181 @@
+\documentclass[11pt]{article}
+\usepackage[top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{xcolor}
+% 
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ifthen}
+\usepackage{mathpartir}
+\usepackage{mathtools}
+\input{macros}
+% 
+\begin{document}
+
+\title{CO663: Language $\lggeT$ --- double}
+
+\date{\vspace{-7ex}} 
+\maketitle
+
+% \pagenumbering{gobble}
+
+\newcommand{\lazyeval}[1]{\framebox{\parbox[c][#1]{\textwidth}{
+      \color{white}{h}% 
+    }}}
+
+
+\section{Correct implementation}
+
+A function that doubles its argument can be defined as follows:
+%
+\[
+\text{double} \defi 
+\clam{\tynat}{x}
+{
+  \citer{\ez}{v}{\esucc{\esucc{\var{v}}}}{\var{x}}
+}
+\]
+
+
+We can convince ourselves that it works as expected by applying it to
+some parameter (${\esucc{\ez}}$ or 1)  and evaluate it.
+\begin{enumerate}
+\item Instantiate the function: \[
+  \semrule
+  {\tsemrulename{lav}}
+  {\,}
+  {\jtrans
+    {\capp{\text{double}}{\esucc{\ez}}}
+    {
+      \citer{\ez}{v}{\esucc{\esucc{\var{v}}}}{{\esucc{\ez}}}
+    }}
+  \]
+\item Iterate once (and using $\alpha$-renaming, for safety):
+  \[
+  \semrule
+  {\tsemrulename{rs}}
+  {\,}
+  {
+    \jtrans
+    {
+      \citer{\ez}{v}{\esucc{\esucc{\var{v}}}}{{\esucc{\ez}}}
+    }
+    {
+      \subs
+      {\esucc{\esucc{\var{v}}}}
+      {
+        \citer{\ez}{v'}{\esucc{\esucc{\var{v'}}}}{{{\ez}}}
+      }
+      {v}
+    }
+  }
+  \]
+\item Applying the substitution, we obtain
+  \[
+  {\esucc{\esucc{
+        \citer{\ez}{v'}{\esucc{\esucc{\var{v'}}}}{{{\ez}}}
+      }}}
+  \]
+\item Reducing one more time:
+  \[
+  \semrule
+  {\tsemrulename{ss}}
+  {
+    \semrule
+    {\tsemrulename{ss}}
+    {
+      \semrule
+      {\tsemrulename{r0}}
+      {\,}
+      { \jtrans{{{
+            \citer{\ez}{v'}{\esucc{\esucc{\var{v'}}}}{{{\ez}}}
+          }}}
+      {{{\ez}}}}
+    }
+    { \jtrans{{\esucc{
+            \citer{\ez}{v'}{\esucc{\esucc{\var{v'}}}}{{{\ez}}}
+          }}}
+      {{\esucc{\ez}}}}
+  }
+  {
+    \jtrans{\esucc{\esucc{
+          \citer{\ez}{v'}{\esucc{\esucc{\var{v'}}}}{{{\ez}}}
+        }}}
+    {\esucc{\esucc{\ez}}}
+  }
+  \]
+\end{enumerate}
+
+
+
+
+\section{Wrong implementation}
+
+If we use $\var{x}$ instead of $\var{v}$ in the inductive case, we
+get:
+\[
+\text{baddouble} \defi 
+\clam{\tynat}{x}
+{
+  \citer{\ez}{v}{\esucc{\esucc{\var{\underline{x}}}}}{\var{{x}}}
+}
+\]
+
+We can convince ourselves that it \emph{does not} work as expected by
+applying it to some parameter (${\esucc{\ez}}$ or 1) and evaluate it.
+% 
+\begin{enumerate}
+\item Instantiate the function: 
+  % 
+  \[
+  \semrule
+  {\tsemrulename{lav}}
+  {\,}
+  {\jtrans
+    {\capp{\text{baddouble}}{\esucc{\ez}}}
+    {
+      \citer{\ez}{v}{\esucc{\esucc{\esucc{\ez}}}}{{\esucc{\ez}}}
+    }}
+  \]
+\item   Iterate once (and using $\alpha$-renaming, for safety):
+  \[
+  \semrule
+  {\tsemrulename{rs}}
+  {\,}
+  {
+    \jtrans
+    {
+      \citer{\ez}{v}{\esucc{\esucc{\esucc{\ez}}}}{{\esucc{\ez}}}
+    }
+    {
+      \subs
+      {\esucc{\esucc{\esucc{\ez}}}}
+      {
+        \citer{\ez}{v'}{\esucc{\esucc{\esucc{\ez}}}}{\ez}
+      }
+      {v}
+    }
+  }
+  \]
+\item Applying the substitution, we obtain (note that $\var{v}$ does
+  not appear in the term, so there is nothing to replace).
+  \[
+  {\esucc{\esucc{\esucc{\ez}}}}
+  \]
+\item ${\esucc{\esucc{\esucc{\ez}}}}$ is a value, so we stop
+  here. Notice that the final result is $3$! 
+\end{enumerate}
+
+
+
+
+\end{document}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

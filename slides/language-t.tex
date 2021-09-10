@@ -1,0 +1,514 @@
+\section{Recursion}
+
+
+% \begin{frame}
+%   \frametitle{Housekeeping} 
+%   \begin{itemize}[<+->]
+%   \item Explain: ``if $\tyjudge{}{e}{\tau}$ and $\jtrans{e}{e'}$, then $\tyjudge{}{e'}{\tau}$''.
+%     \begin{itemize}
+%     \item If $e$ is well-typed and $e$ reduces to $e'$, then $e'$ is
+%       also well-typed (and both $e$ and $e'$ have the same type).
+%     \item This statement is also called \emph{type preservation} (cf.\ type safety,  slide~\ref{fr:ty-safety}).
+%     \end{itemize}
+%   \item Whiteboard pictures on Moodle $\implies$ ask on Piazza.
+%   \item \LaTeX\ in the lectures $\implies$ too risky! 
+%   \end{itemize}
+% \end{frame}
+
+\begin{frame}
+  \frametitle{Introduction}
+
+  \begin{center}
+    {\large
+      What is the \emph{expressive power} of the languages we have studied so far?
+    }
+  \end{center}
+
+  \pause
+
+  \bigskip  
+
+  \begin{itemize}[<+->]
+  \item We can specify the expressivity of a programming language by
+    considering the set of computable functions it can represent.
+    % 
+  \item Most programming languages are \emph{universal}, i.e., Turing
+    complete (meaning that they can be used to simulate a Turing
+    machine).
+    % 
+  \item Hence, expressivity of programming languages is generally
+    concerned with questions such as: can construct $C$ in language
+    $L$ be simulated in language $L'$?
+    % 
+  \item For more on expressivity of programming languages beyond
+    computational power, see, e.g.,
+    \emph{``\href{https://www.sciencedirect.com/science/article/pii/016764239190036W}{On
+        the expressive power of programming languages}''}, by Matthias
+    Felleisen.
+  \end{itemize} 
+
+\end{frame}
+
+
+% \note{In particular, what sort of recursive programs (or programs that
+%   ``loop'' infinitely) can we write in the languages we have seen thus far?}
+
+\begin{frame}
+  \frametitle{Language \lggeT}
+  % 
+  \[
+  \begin{array}{llclll}
+    \TYPES & \tau & \Coloneqq & \tynat  & \tynat & \text{natural}
+    \\
+           &&& \tyarr{\tau_1}{\tau_2}  & \tau_1 \rightarrow \tau_2 & \text{function}
+    \\
+    \\ \pause
+    \EXPS & e & \Coloneqq & \var{x} & \var{x} & \text{variable}
+    \\
+           &&& \ez &  \ez & \text{zero}
+    \\
+           &&& \esucc{e} &  \esucc{e} & \text{successor}
+    \\
+           &&& \elam{\tau}{x}{e} & \clam{\tau}{x}{e} & \text{abstraction}
+    \\
+           &&& \eapp{e_1}{e_2} & \capp{e_1}{e_2} & \text{application}
+    \\
+           &&& \eiter{e_0}{x}{e_1}{e} & \multicolumn{2}{c}{\citer{e_0}{x}{e_1}{e}}                                      
+  \end{array}
+  \]
+
+  \pause
+
+  We write $\bnum{3}$ for $\esucc{\esucc{\esucc{\ez}}}$.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Statics}
+  % (same as $\lggeEF$)
+  \[
+  \tyrule
+  {\ttyrulename{var}}
+  {\,}
+  {\tyjudge{\Gamma_1, \var{x}: \tau, \Gamma_2}{\var{x}}{\tau} }
+  \]
+
+
+  \pause 
+  \bigskip
+
+  \[
+  \tyrule
+  {\ttyrulename{nat}}
+  {\,}
+  {\tyjudge{\Gamma}{\ez}{\tynat}}
+  \qquad\qquad\qquad
+  \tyrule
+  {\ttyrulename{num}}
+  {\tyjudge{\Gamma}{{e}}{\tynat{}}}
+  {\tyjudge{\Gamma}{\esucc{e}}{\tynat{}}}
+  \]
+\end{frame}
+
+
+
+
+\begin{frame}
+  \frametitle{Statics}
+  
+  \[
+  \tyrule
+  {\ttyrulename{lam}}
+  {\tyjudge{\Gamma, \var{x} : \tau_1}{e}{\tau_2}}
+  {\tyjudge{\Gamma}{\elam{\tau_1}{x}{e}}{\tyarr{\tau_1}{\tau_2}}}
+  \]
+
+  \pause
+
+  \[
+  \tyrule
+  {\ttyrulename{ap}}
+  {
+    \tyjudge{\Gamma}{e_1}{\tyarr{\tau_1}{\tau}}
+    \and
+    \tyjudge{\Gamma}{e_2}{\tau_1}
+  }
+  {
+    \tyjudge{\Gamma}{\eapp{e_1}{e_2}}{\tau}
+  }
+  \]
+
+
+  \pause
+
+  \bigskip
+
+  \bigskip
+
+  NB: this rules are the same as for Language $\lggeEF$.
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Statics}
+  \[
+  \tyrule
+  {\ttyrulename{ite}}
+  {
+    \tyjudge{\Gamma}{e}{\tynat}
+    \and
+    \tyjudge{\Gamma}{e_0}{\tau}
+    \and
+    \tyjudge{\Gamma, \var{x} : \tau}{e_1}{\tau}
+  }
+  {
+    \tyjudge{\Gamma}{\eiter{e_0}{x}{e_1}{e}}{\tau}
+  }
+  \]
+
+  \bigskip
+
+  \pause
+  
+  Why do $e_0$ and $e_1$ need to have the same type?
+  
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Dynamics}
+  \emph{Eager} semantics:
+  \[
+  \semrule{\tsemrulename{z}}
+  {\,}
+  {\valjudge{\ez}}
+  \qquad \qquad  \qquad
+  \semrule{\tsemrulename{s}}
+  {\valjudge{e}}
+  {\valjudge{\esucc{e}}}
+  \]
+
+  \[
+  \semrule
+  {\tsemrulename{lam}}
+  {\,}
+  {\valjudge{\elam{\tau}{x}{e}}}
+  \]
+
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Dynamics}
+  
+  % (same as $\lggeEF$)
+
+  \[
+  \semrule
+  {\tsemrulename{ss}}
+  {\jtrans{e}{e'}}
+  {
+    \jtrans{\esucc{e}}{\esucc{e'}}
+  }
+  \]
+
+  \[
+  \semrule
+  {\tsemrulename{ap}}
+  {\jtrans{e_1}{e'_1}}
+  {
+    \jtrans{\eapp{e_1}{e_2}}{\eapp{e'_1}{e_2}}
+  }
+  \]
+\end{frame}
+
+\begin{frame}
+  \frametitle{Dynamics}
+  %  (same as $\lggeEF$)
+
+  \[
+  \semrule
+  {\tsemrulename{lan}}
+  {\valjudge{e_1} 
+    \and \jtrans{e_2}{e'_2}
+  }
+  {\jtrans{\eapp{e_1}{e_2}}{\eapp{e_1}{e'_2}}}
+  \]
+
+  \[
+  \semrule
+  {\tsemrulename{lav}}
+  {\valjudge{e_2}}
+  {\jtrans{\eapp{\elam{\tau}{x}{e_1}}{e_2}}{\subs{e_1}{e_2}{x}}}
+  \]
+\end{frame}
+
+\begin{frame}
+  \frametitle{Dynamics (iterator)}
+  
+
+  \begin{itemize}[<+->]
+  \item Evaluate the parameter
+    \[
+    \semrule
+    {\tsemrulename{rin}}
+    {\jtrans{e}{e'}}
+    {
+      \jtrans{\eiter{e_0}{x}{e_1}{e}}{\eiter{e_0}{x}{e_1}{e'}}
+    }
+    \]
+    % 
+  \item Case if zero 
+    \[
+    \semrule
+    {\tsemrulename{r0}}
+    {\,}
+    {
+      \jtrans{\eiter{e_0}{x}{e_1}{\ez}}{e_0}
+    }
+    \]
+  \item Case if strictly positive
+    \[
+    \semrule
+    {\tsemrulename{rs}}
+    {\valjudge{{e}}}
+    {
+      \jtrans{\eiter{e_0}{x}{e_1}{\esucc{e}}}{\subs{e_1}{{\eiter{e_0}{x}{e_1}{{e}}}}{x}}
+    }
+    \]
+  \end{itemize}
+
+
+  NB: $\eiter{e_0}{x}{e_1}{e}$ stands for ${\citer{e_0}{x}{e_1}{e}}$     
+\end{frame}
+
+\begin{frame}
+  \frametitle{Alpha equivalence ($\aeq$)}
+  \begin{itemize}[<+->]
+  \item Two programs are \emph{$\alpha$-equivalent} if they are
+    identical up to the choice of \emph{bound} variables.
+    % 
+    \pause
+    \[
+    \elam{\tynat}{x}{\esucc{\var{x}}} \aeq   \elam{\tynat}{y}{\esucc{\var{y}}}
+    \]
+
+    \pause
+
+
+    \[
+    \esucc{\var{x}} \naeq \esucc{\var{y}}
+    \]
+    
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Alpha equivalence ($\aeq$)}
+  \begin{itemize}
+  \item \emph{Bound} variables can be renamed \emph{consistently}
+    without changing the meaning of a program.
+    \[
+    \begin{array}{c}
+      \elam{\tyarr{\tynat}{\tynat}}{x_1}{
+      \elam{\tynat}{x_2}{
+      \eapp
+      {\var{x_1}}
+      {\var{x_2}}
+      }
+      }
+      \\
+      \pause 
+      \qquad
+      \aeq
+      \elam{\tyarr{\tynat}{\tynat}}{y_1}{
+      \elam{\tynat}{y_2}{
+      \eapp
+      {\var{y_1}}
+      {\var{y_2}}
+      }
+      }
+      \\
+      \pause
+      \qquad
+      \naeq
+      \elam{\tyarr{\tynat}{\tynat}}{y_1}{
+      \elam{\tynat}{y_2}{
+      \eapp
+      {\underline{\var{y_2}}}
+      {\underline{\var{y_1}}}
+      }
+      }
+    \end{array}
+    \]
+    \pause
+  \item It's helpful to rename bound variables so that they are all
+    \emph{distinct}, e.g.,
+    \[
+    \begin{array}{c}
+      \eapp
+      {\elam{\tau}{x}{{\var{x}}}}
+      {\elam{\tau'}{x}{\esucc{\var{x}}}}
+      \\ \qquad
+      \pause
+      \aeq
+      \eapp
+      {\elam{\tau}{x}{{\var{x}}}}
+      {\elam{\tau'}{y}{\esucc{\var{y}}}}
+    \end{array}
+    \]
+    
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Substitution}
+  {\Large
+    \[
+    \subs{e_1}{e_2}{x}
+    \]
+  }
+  \pause
+  \begin{itemize}[<+->]
+  \item Substitution is the process of ``plugging in'' an object
+    ($e_2$) for the variable ($\var{x}$) in a program ($e_1$).
+    % 
+  \item Only the \emph{free} occurrences of variable $\var{x}$ should
+    be replaced!
+  \item Example: if
+    \[ 
+    e_1 = \eapp{\elam{\tynat}{x}{\esucc{\var{x}}}}{\underline{\var{x}}}
+    \]
+    \pause
+    then 
+    \[
+    \subs{e_1}{\ez}{x} = 
+    \pause
+    \eapp{\elam{\tynat}{x}{\esucc{\var{x}}}}{\ez}
+    \]
+  \end{itemize}
+  % 
+  \pause
+  NB: $ \eapp{\elam{\tynat}{x}{\esucc{\var{x}}}}{\underline{\var{x}}} 
+  \aeq  \eapp{\elam{\tynat}{y}{\esucc{\var{y}}}}{\underline{\var{x}}} $
+\end{frame}
+
+
+\begin{frame}{Exercises}
+  \label{fr:define-t}
+  % 
+  In $\lggeT$, implement the following functions:
+  \begin{itemize}[<+->]
+  \item Successor ($\tynat{} \rightarrow \tynat$): $\text{succ} \defi \clam{\tynat{}}{x}{{\color{red} ??}}$
+  \item Doubling ($\tynat{} \rightarrow \tynat$): {\color{red} ??}
+  \item Addition ($\tynat{} \rightarrow \tynat \rightarrow \tynat$): 
+    $\text{add} \defi \clam{\tynat{}}{x}{\clam{\tynat{}}{y}{ {\color{red} ??} }}$
+  \item Multiplication ($\tynat{} \rightarrow \tynat \rightarrow \tynat$): {\color{red} ??}
+    % 
+    % 
+  \end{itemize}
+   
+  % \pause
+  % \bigskip 
+  
+  % Using complex data types (see further chapters):
+  % \begin{itemize}
+  % \item Predecessor ($\tynat{} \rightarrow \tynat$): {\color{red} ??} (add product types to $\lggeT$)
+  % \item Subtraction ($\tynat{} \rightarrow \tynat \rightarrow \tynat$): {\color{red} ??}
+  % \end{itemize}
+\end{frame}
+
+% Add: \x \y . iter x { z -> y | v -> s(v)}
+% Doubling: \x . iter x {z -> z | v -> s(s(v))}
+% Multiply: \x \y . iter x {z -> z | v -> add(y,v)}
+% Predecessor: \x . pl(iter x {z -> <z,z> | v -> <pr . v, s(pr . v)>})
+% Subtraction: \x \y . iter x {z -> y | v -> pred(v)}
+
+
+
+
+% \begin{frame}
+%   \frametitle{Housekeeping}
+%   \begin{itemize}[<+->]
+%   \item What does the following term evaluate to
+%     \[
+%     \eapp{\elam{\tynat}{x}{\var{x}}}{\esucc{{\var{x}}}}
+%     \]
+%   \item Is language $\lggeT$ using Peano numbers? Yes, $\lggeT$ is
+%     based on Godel's system T (1958), which includes Peano
+%     axioms/numbers.
+%   \end{itemize}
+% \end{frame}
+\begin{frame}
+  \frametitle{Expressivity of $\lggeT$}
+  \begin{itemize}
+  \item Language $\lggeT$ provides a mechanism called \emph{primitive
+      recursion} (which we used to define arithmetic operations).
+    % 
+  \item Primitive recursion can characterise the \emph{inductive}
+    nature of the natural numbers.
+    % 
+  \item In $\lggeT$, we can only define \emph{total recursive
+      functions} on the natural numbers (functions that \emph{always} return
+    something).
+    %  
+  \item This inductive natures implies that every program comes with a
+    proof of its \emph{termination} (we always ``bottom out'' using the
+    induction principle).
+    % 
+  \item To obtain Turing completeness, we need a \emph{partial
+      recursive} language (where some programs may not terminate).
+  \end{itemize}
+\end{frame}
+
+
+
+% \separator{Examinable material for 2018 \emph{ends} here.}
+
+
+\begin{frame}
+  \frametitle{Y-Combinator}
+  An option to express \emph{general recursion}\footnote{i.e.,
+    allowing for partial functions.} is to introduce the $Y$
+  combinator.
+  
+  \bigskip
+  Its type is
+  \[
+  Y : (\tau \rightarrow \tau) \rightarrow \tau
+  \]
+  
+
+  \pause
+
+  Additional semantic rule:
+  \[
+  \semrule
+  {\tsemrulename{y}}
+  {\,}
+  {
+    \jtrans{Y f}{ f(Y f)}
+  }
+  \]
+
+  \pause
+  \bigskip
+ 
+  NB: in the \emph{untyped} lambda-calculus, it can be expressed as
+  \[
+  Y \defi \lambda f  .\ (\lambda x . f (x \ x))  \ (\lambda x . f (x \ x))
+  \]
+
+  Exercise: try to find a type for that term!
+\end{frame}
+
+\separator{Examinable material for 2020 ends here.}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
+
+%  LocalWords:  computable expressivity Examinable

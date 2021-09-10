@@ -1,0 +1,342 @@
+\section{Resource-awareness}
+
+\subsection{Syntax}
+
+\begin{frame}[fragile]
+  \frametitle{Introduction}
+
+  Resource-awareness in Rust, via ownership types.
+\begin{lstlisting}
+fn main() {
+    let i = Box::new(513i32);
+    foo(i);
+    foo(i);
+}
+
+fn foo(i: Box<i32>) {
+    println!("i is: {}", i);
+}
+\end{lstlisting}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Introduction}
+The compiler complains with
+\begin{lstlisting}
+error[E0382]: use of moved value: `i`
+ --> hello.rs:4:9
+  |
+3 |     foo(i);
+  |         - value moved here
+4 |     foo(i);
+  |         ^ value used here after move
+  |
+ = note: move occurs because `i` has type `std::boxed::Box<i32>`,
+         which does not implement the `Copy` trait
+
+error: aborting due to previous error
+\end{lstlisting}
+
+\pause
+
+  \begin{quotation}
+    Ownership rules ensure, that at any point, for a single
+    non-copyable value, there is \emph{only one owner} that can change
+    it.
+  \end{quotation}
+
+\end{frame}
+
+
+\note{The main goal of ownership types in Rust is to have memory
+  safety without garbage collection}
+
+\begin{frame}
+  \frametitle{Language $\lggeL$}
+  \[
+  \begin{array}{l@{\;}l@{\;}c@{\;}l@{\;}l@{\;}l}
+    \QUAL & q & \Coloneqq & \unq & \unq & \text{unrestricted}
+    \\ 
+          &&& \linq & \linq & \text{linear}
+    \\\\
+    \PTYPES & \rho & \Coloneqq & \ebool{} & \ebool{} & \text{boolean}
+    \\
+          &&& \typrod{\tau_1}{\tau_2} & \tau_1 \times \tau_2 & \text{product} 
+    \\
+           &&& \tyarr{\tau_1}{\tau_2}  & \tau_1 \rightarrow \tau_2 & \text{function}
+    \\\\
+    \TYPES & \tau & \Coloneqq & \ptype{q}{\rho}  & \ptype{q}{\rho}  & \text{qualified pre-type}
+    \\\\
+    \EXPS & e & \Coloneqq & \var{x} & \var{x} & \text{variable}
+    \\
+           &&& \elbool{b}{q} & \ptype{q}{b} & \text{boolean}
+    \\
+          &&& \elpair{e_1}{e_2}{q} & \clpair{e_1}{e_2}{q} & \text{pair}
+    \\
+           &&& \ellam{\tau}{x}{e}{q} & \cllam{\tau}{x}{e}{q} & \text{abstraction}
+    \\
+           &&& \eapp{e_1}{e_2} & \capp{e_1}{e_2} & \text{application}
+    \\
+          &&& \esplit{e_1}{x}{y}{e_2} & \csplit{e_1}{x}{y}{e_2} & \text{split}
+  \end{array}
+  \]
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Operations on contexts}
+
+  We revise our notion of context in this part so that $\Gamma$ is of the form:
+  \[
+  \begin{array}{lcll}
+    \Gamma & \Coloneqq & \varnothing & \text{empty context}
+    \\
+           && \Gamma, \var{x}: \ptype{q}{\tau} & \text{hypothesis}
+  \end{array}
+  \]
+
+
+  \begin{itemize}
+  \item The context $\varnothing$ does not contain any hypothesis.
+  \item Example of $\Gamma$:
+    \[\var{x} : \ptype{\linq}{\ebool{}}, \var{y} :
+    \ptype{\unq}{\ebool{}}, \var{z}:
+    \ptype{\unq}{\tyarr{\ebool{}}{\ebool{}}}
+    \]
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Splitting contexts}
+  We define rules to split the context according to the restriction
+  of the hypotheses therein.
+
+  \[
+  \tyrule{empty}
+  {\,}
+  {\varnothing = \varnothing \ctxtsplit \varnothing}
+  \]
+  
+  \[
+  \tyrule{unres}
+  {\Gamma = \Gamma_1 \ctxtsplit \Gamma_2}
+  {\Gamma, \var{x}: \ptype{\unq}{\rho} =
+    (\Gamma_1, \var{x}: \ptype{\unq}{\rho}) \ctxtsplit (\Gamma_2, \var{x}: \ptype{\unq}{\rho}) }
+  \]
+
+  \[
+  \tyrule{res-l}
+  {\Gamma = \Gamma_1 \ctxtsplit \Gamma_2}
+  {\Gamma, \var{x}: \ptype{\linq}{\rho} =
+    (\Gamma_1, \var{x}: \ptype{\linq}{\rho}) \ctxtsplit \Gamma_2 }
+  \]
+
+  \[
+  \tyrule{res-r}
+  {\Gamma = \Gamma_1 \ctxtsplit \Gamma_2}
+  {\Gamma, \var{x}: \ptype{\linq}{\rho} =
+    \Gamma_1 \ctxtsplit
+    (\Gamma_2, \var{x}: \ptype{\linq}{\rho}) }
+  \]
+
+\end{frame}
+
+
+\subsection{Type system}
+
+\begin{frame}
+  \frametitle{Statics}
+  \[
+  \tyrule
+  {\ltyrulename{var}}
+  {
+    \unres{\Gamma_1} 
+    \and
+    \unres{\Gamma_2}
+  }
+  {\tyjudge{\Gamma_1, \var{x}: \tau , \Gamma_2}{\var{x}}{\tau}}
+  \]
+
+  \[
+  \tyrule
+  {\ltyrulename{bool}}
+  {\unres{\Gamma}}
+  {\tyjudge{\Gamma}{\elbool{b}{q}}{\elbool{}{q}}}
+  \]
+
+  \bigskip
+
+  Auxiliary definitions:
+  \begin{itemize}
+  \item $\unres{\tau}$ if and only if $\tau = \ptype{\unq}{\rho}$
+  \item $\linear{\tau}$ always holds (i.e., $\tau =  \ptype{\unq}{\rho}$ or  $\tau =  \ptype{\linq}{\rho}$)
+  \item $q(\Gamma)$ if and only if $(\var{x} : \tau) \in \Gamma$ implies $q(\tau)$. 
+    % 
+  \end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}
+  \frametitle{Statics}
+  
+
+  \[
+  \tyrule
+  {\ltyrulename{pair}}
+  {
+    q(\tau_1)
+    \and
+    \tyjudge{\Gamma_1}{e_1}{\tau_1}
+    \and
+    q(\tau_2)
+    \and
+    \tyjudge{\Gamma_2}{e_2}{\tau_2}
+  }
+  {
+    \tyjudge{\Gamma_1 \ctxtsplit \Gamma_2}{\elpair{e_1}{e_2}{q}}{\ptype{q}{\typrod{\tau_1}{\tau_2}}
+    }
+  }
+  \]
+
+  \bigskip
+
+  \[
+  \tyrule
+  {\ltyrulename{split}}
+  {
+    \tyjudge{\Gamma_1}{e_1}{\ptype{q}{\typrod{\tau_1}{\tau_2}}}
+    \and
+    \tyjudge{\Gamma_2, \var{x}: \tau_1, \var{y}: \tau_2 }{e_2}{\tau}
+    }
+    {
+    \tyjudge{\Gamma_1 \ctxtsplit \Gamma_2}
+    {\esplit{e_1}{x}{y}{e_2}}
+    {\tau}
+  }
+  \]
+  
+
+\end{frame}
+
+
+
+
+\begin{frame}
+  \frametitle{Statics}
+  
+
+  \[
+  \tyrule
+  {\ltyrulename{abs}}
+  {
+    q(\Gamma)
+    \and
+    \tyjudge{\Gamma, \var{x} : \tau_1}{e}{\tau_2}
+  }
+  {
+    \tyjudge{\Gamma}
+    {\ellam{\tau_1}{x}{e}{q}}
+    {\ptype{q}{\tyarr{\tau_1}{\tau_2}}}
+  }
+  \]
+
+  \bigskip
+
+  \[
+  \tyrule
+  {\ltyrulename{ap}}
+  {
+    \tyjudge{\Gamma_1}{e_1}{\ptype{q}{\tyarr{\tau_1}{\tau_2}}}
+    \and
+    \tyjudge{\Gamma_2}{e_2}{\tau_2}
+    }
+    {
+    \tyjudge{\Gamma_1 \ctxtsplit \Gamma_2}
+    {\eapp{e_1}{e_2}}
+    {\tau_2}
+  }
+  \]
+ 
+\end{frame}
+
+
+%  $\cllam{\tau}{x}{e}{q}$
+%  \capp{e_1}{e_2} 
+%  \clpair{e_1}{e_2}{q}
+\begin{frame}
+  \frametitle{Examples}
+  %  Explain different restrictions with examples (see Walker) 
+  Note the
+  premise $q(\Gamma)$ in rule $\grulename{\ltyrulename{abs}}$.
+  % 
+  % 
+  Consider the following examples:
+
+
+  \[
+  \begin{array}{rcl}
+    T & \defi &\ptype{\unq}{\ebool{}} \rightarrow \ptype{\linq}{\ebool{}}
+    \\
+    A & \defi &\cllam{\ptype{\linq}{\ebool{}}}{x}{
+                \capp
+                {\cllam{\ptype{\unq}{T}}{f}{\ptype{\linq}{\ktrue}}{\linq}}
+                {\cllam{\ptype{\unq}{\ebool{}}}{y}{\var{x}}{\unq}}
+                }
+                {\linq}
+    \\
+    B & \defi & \cllam{\tau}{x}{
+    \capp
+    {\cllam{\ptype{\unq}{T}}{f}{ 
+                \clpair
+                {E}
+                {E}
+                {\linq}
+                }{\linq}}
+    {\cllam{\ptype{\unq}{\ebool{}}}{y}{\var{x}}{\unq}}
+    }{\linq}
+    \\
+    && \text{with} \quad E \defi {\capp{\var{f}}{\ptype{\unq}{\ktrue}}}
+  \end{array}
+  \]
+  % 
+\end{frame}
+
+
+
+
+\begin{frame}
+  \frametitle{Type safety}
+  What sort of additional type safety guarantees does this language
+  give us?
+
+  \bigskip
+  How to formalise them?
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Linearity in PL: references}
+  \begin{itemize}
+  \item
+    \href{https://mitpress.mit.edu/sites/default/files/titles/content/9780262162289_sch_0001.pdf}{Substructural
+      Type System}, by David Walker (source material)
+%
+  \item
+    \href{https://www.cs.cmu.edu/~./fp/courses/15816-f01/handouts/linlam.pdf}{Linear
+      $\lambda$-Calculus}, by Frank Pfenning
+  \item
+    \href{http://nercury.github.io/rust/guide/2015/01/19/ownership.html}{Quick
+      overview of ownership types in Rust}
+  \end{itemize}
+\end{frame}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

@@ -1,0 +1,282 @@
+\documentclass[11pt]{article}
+\usepackage[top=2cm,bottom=2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{xcolor}
+% 
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ifthen}
+\usepackage{mathpartir}
+\usepackage{mathtools}
+\input{../../slides/macros}
+% 
+\begin{document}
+
+\title{CO663 Part II: Worksheet 3 (\emph{assessed})}
+
+\date{\vspace{-5ex}}
+\maketitle
+
+% \pagenumbering{gobble}
+
+\newcommand{\answerbox}[1]{\framebox{\parbox[c][#1]{\textwidth}{
+      \color{white}{h}% 
+    }}}
+
+
+\section{Introduction}
+
+The objective of this class is to put in practice the typing and
+semantic rules for language $\lggeE$.
+% 
+This is an individual exercise.
+
+\begin{center}
+  \emph{This class assessment is worth {\color{red} 6} marks.}
+\end{center}
+
+Submit your work via Moodle (within the deadline specified on the
+Moodle page).
+
+
+\section{Exercises}
+
+\begin{enumerate}
+\item Formally type-check \emph{and} evaluate (until your reach a value) the
+following expressions:
+\begin{enumerate}
+\item $\elet{\enum{3}}{{z}}{\etimes{\var{z}}{\enum{2}}}$ (its type is $\enum{}$)
+\item $\eplus{\etimes{\enum{12}}{\enum{0}}}{\elen{\estr{hi}}}$ (its type is $\enum{}$).
+\end{enumerate}
+\item Write down your own syntactically correct and well-typed term
+  (it must be have a \emph{depth of 3}, at least). Show
+  that is well-typed and evaluate it fully.
+\end{enumerate} 
+
+Each (type or semantic) derivation is worth 1 mark.
+
+% 
+
+\section{Additional information}
+The depth of term $e$, written $\lvert e \rvert$, is the depth of its
+abstract syntax tree.
+% 
+It is is defined formally as follows:
+% 
+\[
+\lvert e \rvert =
+\begin{cases}
+  1 & \text{if } e = \var{x}, \ e = \enum{n}, \ e = \estr{s}, \ e = \ktrue, \ \text{or } e = \kfalse
+  \\
+  1 {+}  \lvert e' \rvert  & \text{if } e = \elen{e'}
+  \\
+  1   {+} \textit{max}(\lvert e_1 \rvert, \lvert e_2 \rvert)  & \text{if }  e = \elet{e_1}{x}{e_2}, \ e = \etimes{e_1}{e_2}, \  e = \eplus{e_1}{e_2}, \ \text{etc.}
+  \\
+  1   {+} \textit{max}(\lvert e' \rvert, \lvert e_1 \rvert, \lvert e_2 \rvert)  & \text{if } e = \site{e'}{e_1}{e_2}
+\end{cases}
+\]
+For instance,
+\begin{itemize}
+\item $\lvert \elet{\enum{3}}{{z}}{\etimes{\var{z}}{2}} \rvert = 3$, 
+\item $\lvert \eplus{\etimes{\enum{12}}{\enum{0}}}{\elen{\estr{hi}}} \rvert = 3$.
+\end{itemize}
+
+\section*{\LaTeX\ template}
+
+If you would like to use \LaTeX\ to typeset your solution, you can use
+the template here:
+\url{https://github.com/ukc-co663/pl-design-latex-template}.
+
+
+\end{document}
+
+\appendix
+
+\section{Model answer}
+
+\subsection{Exercise 2.1.a}
+
+\paragraph{Typing}
+
+\[
+\tyrule{let}
+{
+  \tyrule{num}
+  {\,}
+  {
+    \tyjudge{\varnothing}{\enum{3}}{\enum{}}
+  }
+  \quad
+  \\
+  \tyrule{times}
+  {
+    \tyrule{var}
+    {\,}
+    {
+      \tyjudge{\var{z} : \enum{}}{\var{z}}{\enum{}}
+    }
+    \\
+    \tyrule{num}
+    {\,}
+    {
+      \tyjudge{\var{z} : \enum{}}{\enum{2}}{\enum{}}
+    }
+  }
+  {
+    \tyjudge
+    {\var{z} : \enum{}}
+    {\etimes{\var{z}}{\enum{2}}}
+    {\enum{}}
+  }
+}
+{
+  \tyjudge{\varnothing}
+  {\elet{\enum{3}}{{z}}{\etimes{\var{z}}{\enum{2}}}}
+  {\enum{}}
+}
+\]
+
+\paragraph{Evaluation}
+
+\begin{enumerate}
+\item First step/tree:
+  \[
+  \semrule
+  {letn}
+  {\,}
+  {\jtrans
+    {\elet{\enum{3}}{{z}}{\etimes{\var{z}}{\enum{2}}}}
+    {\etimes{\enum{3}}{\enum{2}}}
+  }
+  \]
+\item Second step/tree:
+  \[
+  \semrule
+  {letn}
+  {3 \times 2 = 6 }
+  {\jtrans
+    {\etimes{\enum{3}}{\enum{2}}}
+    {\enum{6}}
+  }
+  \]
+\end{enumerate}
+
+\subsection{Exercise 2.1.b}
+
+\paragraph{Typing}
+
+\[
+\tyrule{plus}
+{
+  \tyrule{times}
+  {
+    \tyrule{num}
+    {\,}
+    {  \tyjudge{\varnothing}
+      {\enum{12}}
+      {\enum{}}}
+    \\
+    \tyrule{num}
+    {\,}
+    {  \tyjudge{\varnothing}
+      {\enum{0}}
+      {\enum{}}}
+  }
+  {
+    \tyjudge{\varnothing}
+    {\etimes{\enum{12}}{\enum{0}}}
+    {\enum{}}
+  }
+  \\
+  \tyrule{len}
+  {
+    \tyrule{str}
+    {\,}
+    {
+      \tyjudge{\varnothing}
+      {\estr{hi}}
+      {\estr{}}
+    }
+  }
+  {
+    \tyjudge{\varnothing}
+    {\elen{\estr{hi}}}
+    {\enum{}}
+  }
+}
+{
+  \tyjudge{\varnothing}
+  {\eplus{\etimes{\enum{12}}{\enum{0}}}{\elen{\estr{hi}}}}
+  {\enum{}}
+}
+\]
+\paragraph{Evaluation}
+
+
+\begin{enumerate}
+\item First step/tree:
+  \[
+  \semrule
+  {pll}
+  {
+    \semrule
+    {tmval}
+    {12 \times 0 = 0}
+    {
+      \jtrans
+      {\etimes{\enum{12}}{\enum{0}}}
+      {\enum{0}}
+    }
+  }
+  {\jtrans
+    {\eplus{\etimes{\enum{12}}{\enum{0}}}{\elen{\estr{hi}}}}
+    {\eplus{\enum{0}}{\elen{\estr{hi}}}}
+  }
+  \]
+\item Second step/tree:
+  \[
+  \semrule
+  {plr}
+  {
+    % 
+    {\valjudge{\enum{0}}}
+    \\\qquad
+    \semrule
+    {lenv}
+    {\lvert hi \rvert = 2}
+    {
+      \jtrans
+      {\elen{\estr{hi}}}
+      {\enum{2}}
+    }
+  }
+  {\jtrans
+    {\eplus{\enum{0}}{\elen{\estr{hi}}}}
+    {\eplus{\enum{0}}{\enum{2}}}
+  }
+  \]
+\item Third step/tree:
+  \[
+  \semrule
+  {plval}
+  {0+2=2}
+  {\jtrans
+    {\eplus{\enum{0}}{\enum{2}}}
+    {\enum{2}}
+  }
+  \]
+  
+\end{enumerate}
+
+
+
+\end{document}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

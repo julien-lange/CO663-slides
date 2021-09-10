@@ -1,0 +1,763 @@
+\documentclass[11pt,landscape]{article}
+%\documentclass[11pt]{article}
+\usepackage[top=1cm,bottom=1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{xcolor}
+% 
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ifthen}
+\usepackage{mathpartir}
+\input{../../slides/macros}
+% 
+\begin{document}
+
+% \title{CO663 Part II: Worksheet 3 (model answer)} 
+\title{CO663 Part II: Worksheet 2 (model answer)} 
+
+\date{\vspace{-5ex}}
+\maketitle
+
+\pagenumbering{gobble}
+
+\newcommand{\answerbox}[1]{\framebox{\parbox[c][#1]{\textwidth}{
+      \color{white}{h}% 
+    }}}
+
+
+\section{Introduction}
+
+The objective of this class is to put in practice what we have covered
+in the lectures so far.
+% 
+We will focus on Language $\lggeEF$.
+%
+Type-check \emph{and} evaluate (until your reach a value)
+\emph{three} of the following expressions.
+%
+If you do not have much time, you should focus on evaluation.
+% 
+% There is two modes depending on whether you are working in groups or
+% not.
+% % 
+% You should answer at least one mode.
+% 
+% Submit your answer on Moodle (pictures of readable handwriting is
+% accepted).
+
+% \begin{center}
+%   \emph{This class assessment is worth {\color{red} 6} points of your final mark for this module.}
+% \end{center}
+
+% \section{Interactive mode}
+% % 
+
+% Form a team of two, then follow \emph{individually} the steps below
+% \underline{\emph{twice}}.
+
+% \begin{enumerate}
+% \item Write down \emph{one expression} in Language $\lggeEF$ that you
+%   think is well-typed and you have \underline{not} seen before. Make
+%   sure that the expression ($i$) is syntactically correct and ($ii$)
+%   contains at least \emph{three} operators.\footnote{The depth of the
+%     abstract syntax tree is at least $3$.}
+%   % 
+% \item \emph{Exchange} what you have produced in Step 1 with your
+%   teammate.
+%   % 
+% \item \emph{Check} that the expression you are given is
+%   syntactically correct (if not, fix it).
+
+% \item \emph{Type-check} (formally) the expression.
+%   % 
+% \item \emph{Exchange} what you have produced in Step 4 with your
+%   teammate.
+%   % 
+% \item \emph{Check} that the type derivation you are given is correct
+%   (if not, fix it).
+%   % 
+% \item \emph{Evaluate} the expression (until you reach a value).
+%   % 
+% \item \emph{Exchange} what you have produced in Step 7 with your
+%   teammate.
+%   % 
+% \item \emph{Check} that the evaluation derivation(\emph{s}) you are
+%   given are correct (if not, fix them).
+% \end{enumerate}
+
+% \section{Passive mode}
+
+
+% 
+\begin{enumerate}
+\item $\clam{\enum{}}{x}{\etimes{\var{x}}{\var{x}}}$
+  % 
+\item { $\elet{\clam{\enum{}}{x}{
+        \clam{\enum{}}{y}{
+          \etimes{\var x}{\var y}
+        }
+      }
+    }{f}{
+      \eapp
+      {\eapp
+        {\var{f}}
+        {\enum{4}}
+      }
+      {\enum{4}}
+    }
+    $}
+
+\item $\clam{(\tau_1 \rightarrow \tau_1) \rightarrow \tau_2}{t}{
+    \clam{\tau_3}{v}{
+      \capp{\var{t}}{\clam{\tau_1}{u}{\var u}}
+    }
+  }$
+
+  Hint: start with $((\tau_1 \rightarrow \tau_1) \rightarrow \tau_2) \rightarrow \tau_3 \rightarrow \tau_2$
+
+
+\item $\elet{\clam{\enum{}}{x}{
+      \eapp{\var f}{\eplus{\var{x}}{\enum{1}}}
+    }
+  }{f}{
+    \eapp{\var{f}}{0}
+  }$ 
+\end{enumerate}
+
+\section*{\LaTeX\ template}
+
+If you would like to use \LaTeX\ to typeset your solution, you can use
+the template here:
+\url{https://github.com/ukc-co663/pl-design-latex-template}.
+
+
+% \end{document}
+
+\newpage
+
+
+\section{Model answer}
+For the sake of space I have removed the prefix of the rule names,
+e.g., I write {\sc apn} for {\sc \bf EF}$-${\sc se}$-${\sc
+  apn}.
+
+
+
+\subsection{Expression \#1}
+
+\subsubsection{Type derivation}
+
+\[
+\tyrule{{lam}}
+{
+  \tyrule{{times}}
+  {
+    \tyrule{{var}}
+    {\,}
+    {
+      \tyjudge{\var{x} : \enum{}}
+      {\var{x}}
+      {\enum{}}
+    }
+    \\
+    \tyrule{{var}}
+    {\,}
+    {
+      \tyjudge{\var{x} : \enum{}}
+      {\var{x}} 
+      {\enum{}}
+    }
+  }
+  {  \tyjudge{\var{x} : \enum{}}
+    {\etimes{\var{x}}{\var{x}}}
+    {\enum{}}
+  }
+}
+{
+  \tyjudge{\emptyset}
+  {\clam{\enum{}}{x}{\etimes{\var{x}}{\var{x}}}}
+  {\enum{} \rightarrow \enum{}}
+}
+\]
+
+\subsubsection{Evaluation} It is a value, we cannot evaluate further.
+
+
+\[
+\semrule{lam}{\,}
+{\valjudge{\clam{\enum{}}{x}{\etimes{\var{x}}{\var{x}}}}}
+\]
+
+
+\subsection{Expression \#2}
+
+\subsubsection{Type derivation}
+\[
+\tiny
+\tyrule{let}
+{
+  \tyrule
+  {lam}
+  {
+    \tyrule{lam}
+    {
+      \tyrule{times}
+      {
+        \tyrule{var}
+        {\,}
+        {
+          \tyjudge{\var{x}: \enum{}, \var{y}: \enum{}}{\var{x}}{\enum{}}
+        }
+        \\
+        \tyrule{var}
+        {\,}
+        {
+          \tyjudge{\var{x}: \enum{}, \var{y}: \enum{}}{\var{y}}{\enum{}}
+        }
+      }
+      {
+        { \tyjudge{\var{x}: \enum{}, \var{y}: \enum{}}{{{
+                \etimes{\var x}{\var y}
+              }
+            }
+          }{\enum{}}}
+      }
+    }
+    { \tyjudge{\var{x}: \enum{}}{{
+          \clam{\enum{}}{y}{
+            \etimes{\var x}{\var y}
+          }
+        }
+      }{\enum{} \rightarrow \enum{}}
+    }
+  }
+  { \tyjudge{\emptyset}{\clam{\enum{}}{x}{
+        \clam{\enum{}}{y}{
+          \etimes{\var x}{\var y}
+        }
+      }
+    }{\enum{} \rightarrow (\enum{} \rightarrow \enum{})}}
+  \\
+  \tyrule{ap}
+  {
+    \tyrule{ap}
+    {
+      \tyrule{var}
+      {\,}
+      {
+        \tyjudge{\var{f} : {\enum{} \rightarrow (\enum{} \rightarrow \enum{})}}
+        {
+          {\var{f}}
+        }
+        {\enum{} \rightarrow (\enum{} \rightarrow \enum{})}
+      }
+      \\
+      \tyrule{num}
+      {\,}
+      {
+        \tyjudge{\var{f} : (\ldots)}
+        {\enum{4}}
+        {\enum{}}
+      }
+    }
+    {
+      \tyjudge{\var{f} : {\enum{} \rightarrow (\enum{} \rightarrow \enum{})}}
+      {\eapp
+        {\var{f}}
+        {\enum{4}}
+      }
+      {\enum{} \rightarrow \enum{}}
+    }
+    \\
+    \tyrule{num}
+    {\,}
+    {
+      \tyjudge{\var{f} : (\ldots)}
+      {\enum{4}}
+      {\enum{}}
+    }
+  }
+  { \tyjudge{\var{f} : {\enum{} \rightarrow (\enum{} \rightarrow \enum{})}}{
+      \eapp
+      {\eapp
+        {\var{f}}
+        {\enum{4}}
+      }
+      {\enum{4}}
+    }{\enum{}}}
+}
+{
+  \tyjudge{\emptyset}{
+    \elet{\clam{\enum{}}{x}{
+        \clam{\enum{}}{y}{
+          \etimes{\var x}{\var y}
+        }
+      }
+    }{f}{
+      \eapp
+      {\eapp
+        {\var{f}}
+        {\enum{4}}
+      }
+      {\enum{4}}
+    } 
+  }
+  {\enum{}}
+}
+\]
+
+
+\subsubsection{Evaluation (call-by-name)}  
+
+For convenience we define the following expressions:
+\begin{itemize}
+\item $F \defi {\clam{\enum{}}{x}{
+      \clam{\enum{}}{y}{
+        \etimes{\var x}{\var y}
+      }
+    }
+  } $
+\item $B \defi {
+    \eapp
+    {\eapp
+      {\var{f}}
+      {\enum{4}}
+    }
+    {\enum{4}}
+  }$
+\end{itemize}
+
+
+Next, we evaluate step-by-step until we reach a value:
+
+\begin{enumerate}
+\item 
+  \[
+  \semrule
+  {let}
+  {\,}
+  {\jtrans{
+      \elet{F}{f}{B}
+    }{
+      {
+        \subs{B}{F}{x} \equiv 
+        {
+          \eapp
+          {\eapp
+            {F}
+            {\enum{4}}
+          }
+          {\enum{4}}
+        }
+      }
+    }
+  }
+  \]
+
+\item \[
+  \semrule{ap}
+  {
+    \semrule
+    {apn}
+    {
+      \,
+    }
+    {
+      \jtrans{{\eapp
+          {F}
+          {\enum{4}}
+        }
+      }
+      {
+        {
+          \clam{\enum{}}{y}{
+            \etimes{\enum{4}}{\var y}
+          }
+        }  
+      }
+    }
+  }
+  {
+    \jtrans{
+      \eapp
+      {\eapp
+        {F}
+        {\enum{4}}
+      }
+      {\enum{4}}
+    }{
+      \eapp{
+        \clam{\enum{}}{y}{
+          \etimes{\enum{4}}{\var y}
+        }
+      }
+      {\enum{4}}
+    }
+  }
+  \]
+\item
+  \[
+  \semrule{apn}
+  {\,}
+  {\jtrans{
+      \eapp{
+        \clam{\enum{}}{y}{
+          \etimes{\enum{4}}{\var y}
+        }
+      }
+      {\enum{4}}
+    }{ \etimes{\enum{4}}{\enum{4}}}}
+  \]
+\item
+  \[
+  \semrule{times}
+  {\,}
+  {\jtrans{ \etimes{\enum{4}}{\enum{4}}}{\enum{16}}}
+  \]
+\item
+  \[
+  \valjudge{\enum{16}}
+  \]
+\end{enumerate}
+
+
+
+
+\subsection{Expression \#3}
+
+\subsubsection{Type derivation}
+
+We the concrete syntax:
+
+\[
+\tiny
+\tyrule{lam}
+{
+\tyrule{lam}
+{
+  \tyrule{ap}
+  {
+    \tyrule{var}
+    {\,}
+    {
+      \tyjudge{\var{t} : (\tau_1 \rightarrow \tau_1) \rightarrow \tau_2, \var{v} : \tau_3}
+      {\var{t}}
+      {(\tau_1 \rightarrow \tau_1) \rightarrow \tau_2}
+    }
+    \\
+    \tyrule{lam}
+    {
+      \tyrule{var}
+      {\,}
+      {
+        \tyjudge{\var{t} : (\tau_1 \rightarrow \tau_1) \rightarrow \tau_2, \var{v} : \tau_3, \var{u} : \tau_1} 
+        {\var u}
+        {\tau_1}
+      }
+    }
+    {
+      \tyjudge{\var{t} : (\tau_1 \rightarrow \tau_1) \rightarrow \tau_2, \var{v} : \tau_3} 
+      {\clam{\tau_1}{u}{\var u}}
+      {\tau_1 \rightarrow \tau_1}
+    }
+  }
+  {
+    \tyjudge{\var{t} : (\tau_1 \rightarrow \tau_1) \rightarrow \tau_2, \var{v} : \tau_3}
+    {
+        \capp{\var{t}}{\clam{\tau_1}{u}{\var u}}
+    }
+    {\tau_2}
+  }
+}
+{
+  \tyjudge{\var{t} : (\tau_1 \rightarrow \tau_1) \rightarrow \tau_2}
+  {
+      \clam{\tau_3}{v}{
+        \capp{\var{t}}{\clam{\tau_1}{u}{\var u}}
+      }
+  }
+  {\tau_3 \rightarrow \tau_2}
+}
+}
+{
+  \tyjudge{\emptyset}
+  {
+    \clam{(\tau_1 \rightarrow \tau_1) \rightarrow \tau_2}{t}{
+      \clam{\tau_3}{v}{
+        \capp{\var{t}}{\clam{\tau_1}{u}{\var u}}
+      }
+    }
+  }
+  {((\tau_1 \rightarrow \tau_1) \rightarrow \tau_2) \rightarrow \tau_3 \rightarrow \tau_2}
+}
+\]
+
+With the abstract syntax:
+
+\[
+\tiny
+\tyrule{lam}
+{
+\tyrule{lam}
+{
+  \tyrule{ap}
+  {
+    \tyrule{var}
+    {\,}
+    {
+      \tyjudge{\var{t} : {\tyarr{\tyarr{\tau_1}{\tau_1}}{\tau_2}}, \var{v} : \tau_3}
+      {\var{t}}
+      {\tyarr{\tyarr{\tau_1}{\tau_1}}{\tau_2}}
+    }
+    \\
+    \tyrule{lam}
+    {
+      \tyrule{var}
+      {\,}
+      {
+        \tyjudge{\var{t} : {\tyarr{\tyarr{\tau_1}{\tau_1}}{\tau_2}}, \var{v} : \tau_3, \var{u} : \tau_1} 
+        {\var u}
+        {\tau_1}
+      }
+    }
+    {
+      \tyjudge{\var{t} :{\tyarr{\tyarr{\tau_1}{\tau_1}}{\tau_2}}, \var{v} : \tau_3} 
+      {\clam{\tau_1}{u}{\var u}}
+      {\tyarr{\tau_1}{\tau_1}}
+    }
+  }
+  {
+    \tyjudge{\var{t} :{\tyarr{\tyarr{\tau_1}{\tau_1}}{\tau_2}}, \var{v} : \tau_3}
+    {
+        \eapp{\var{t}}{\clam{\tau_1}{u}{\var u}}
+    }
+    {\tau_2}
+  }
+}
+{
+  \tyjudge{\var{t} :{\tyarr{\tyarr{\tau_1}{\tau_1}}{\tau_2}}}
+  {
+      \clam{\tau_3}{v}{
+        \eapp{\var{t}}{\clam{\tau_1}{u}{\var u}}
+      }
+  }
+  {\tyarr{\tau_3}{\tau_2}}
+}
+}
+{
+  \tyjudge{\emptyset}
+  {
+    \clam{{\tyarr{\tyarr{\tau_1}{\tau_1}}{\tau_2}}}{t}{
+      \clam{\tau_3}{v}{
+        \eapp{\var{t}}{\clam{\tau_1}{u}{\var u}}
+      }
+    }
+  }
+  {\tyarr{
+      \tyarr{\tyarr{\tau_1}{\tau_1}}{\tau_2}}
+    {\tyarr{\tau_3}{\tau_2}}
+  }
+}
+\]
+
+\subsubsection{Evaluation} 
+
+
+The expression is already a value:
+
+\[
+\valjudge{
+    \clam{(\tau_1 \rightarrow \tau_1) \rightarrow \tau_2}{t}{
+      \clam{\tau_3}{v}{
+        \capp{\var{t}}{\clam{\tau_1}{u}{\var u}}
+      }
+    }
+  }
+\]
+
+
+
+\subsection{Expression \#4}
+
+\subsubsection{Type derivation}
+
+This expression is ill-typed because $\var{f}$ is used outside of its
+scope.
+% 
+When an expression does not type check, it is enough to show that one
+branch of the derivation tree fails. Here I show the whole tree for
+illustrative purpose.
+\[
+\tiny
+\tyrule{let}
+{
+  \tyrule
+  {ap}
+  {
+    \tyrule{lam}
+    {
+      \tyrule{}
+      {{\color{red} f \text{ undecl.}}}
+      {
+        \tyjudge{\var{x} : \enum{}}
+        {\var f}
+        {{\enum{}} \rightarrow \enum{}}
+      }
+      \\
+      \tyrule{plus}
+      {
+        \tyrule{var}
+        {p}
+        { \tyjudge{\var{x} : \enum{}}
+          {\var{x}}
+          {\enum{}}
+        }
+        \\
+        \tyrule{num}
+        {\,}
+        { \tyjudge{\var{x} : \enum{}}
+          {\enum{1}}
+          {\enum{}}
+        }
+      }
+      {
+        \tyjudge{\var{x} : \enum{}}
+        {\eplus{\var{x}}{\enum{1}}}
+        {\enum{}}
+      }
+    }
+    {
+      \tyjudge{\var{x} : \enum{}}
+      {
+        \eapp{\var f}{\eplus{\var{x}}{\enum{1}}}
+      }
+      {\enum{}} 
+    }
+  }
+  {
+    \tyjudge{\emptyset}
+    {\clam{\enum{}}{x}{
+        \eapp{\var f}{\eplus{\var{x}}{\enum{1}}}
+      }
+    }
+    {\enum{} \rightarrow \enum{}} 
+  }
+  \\
+  \tyrule
+  {ap}
+  {
+    \tyrule
+    {var}
+    {\,}
+    {
+      \tyjudge{\var{f} : \enum{} \rightarrow \enum{}}
+      {\var{f}}
+      {\enum{} \rightarrow \enum{}}
+    }
+    \\
+    \tyrule
+    {num}
+    {\,}
+    {
+      \tyjudge{\var{f} : \enum{} \rightarrow \enum{}}
+      {\enum{0}}
+      {\enum{}}
+    }
+  }
+  {
+    \tyjudge{\var{f} : \enum{} \rightarrow \enum{}}
+    {
+      \eapp{\var{f}}{\enum{0}}
+    }
+    {\enum{}}
+  }
+}
+{
+  \tyjudge{\emptyset}
+  {
+    \elet{\clam{\enum{}}{x}{
+        \eapp{\var f}{\eplus{\var{x}}{\enum{1}}}
+      }
+    }{f}{
+      \eapp{\var{f}}{\enum{0}}
+    }
+  }
+  {
+    \enum{}
+  }
+}
+\]
+\subsubsection{Evaluation (call-by-name)} 
+
+For convenience we define the following expressions:
+\begin{itemize}
+\item $F \defi {\clam{\enum{}}{x}{
+        \eapp{\var f}{\eplus{\var{x}}{\enum{1}}}
+      }
+    }$
+\item $B \defi  \eapp{\var{f}}{\enum{0}}$
+\end{itemize}
+
+
+
+This expression is ill-typed, but we can still evaluate it (and
+possibly get stuck).
+%
+We evaluate step-by-step until we cannot apply any rule:
+
+\begin{enumerate}
+\item 
+\[
+\semrule{let}
+{\,}
+{
+  \jtrans{\elet{F}{f}{B}}
+  { \subs{B}{F}{x} \equiv  \eapp{F}{\enum{0}}}
+}
+\]
+\item 
+  \[
+  \semrule{apn}
+  {\,}
+  {\jtrans
+    {\eapp{F}{\enum{0}}}
+    {
+      {{
+        \eapp{\var f}{\eplus{\enum{0}}{\enum{1}}}
+      }
+    }
+    }
+  }
+  \]
+\item Now we are stuck with ${
+        \eapp{\var f}{\eplus{\enum{0}}{\enum{1}}}
+      }$ since $\var{f}$ is ``unknown''.
+\end{enumerate}
+
+
+
+\textbf{NB:}
+We can fix this expression by replacing $\var{f}$ in the left branch
+of the let by, e.g., the identity function --- ${\clam{\enum{}}{y}{\var{y}}}$:
+\[
+{
+  \elet{\clam{\enum{}}{x}{
+      \eapp{\clam{\enum{}}{y}{\var{y}}}{\eplus{\var{x}}{\enum{1}}}
+    }
+  }{f}{
+    \eapp{\var{f}}{\enum{0}}
+  }
+}
+\]
+
+\end{document}
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

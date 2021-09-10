@@ -1,0 +1,245 @@
+\documentclass[11pt]{article}
+\usepackage[top=2cm,bottom=2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{xcolor}
+% 
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ifthen}
+\usepackage{mathpartir}
+\usepackage{mathtools}
+\input{../../slides/macros}
+% 
+\begin{document}
+
+\title{CO663 Part II: Worksheet 1}
+
+\date{\vspace{-5ex}}
+\maketitle
+
+% \pagenumbering{gobble}
+
+\newcommand{\answerbox}[1]{\framebox{\parbox[c][#1]{\textwidth}{
+      \color{white}{h}% 
+    }}}
+
+
+
+\section{Introduction}
+
+The objective of this class is to put in practice the typing rules for
+language $\lggeE$.
+% 
+
+\section{Language $\lggeE$}
+
+Here is the syntax and type system for language $\lggeE$ (same as in
+the lecture slides).
+
+\subsection{Syntax}
+
+  \[
+  \begin{array}{llclll}
+    \TYPES & \tau & \Coloneqq & \enum{}  & \enum{} & \text{numbers}
+    \\
+           &&& \estr{} & \estr{} & \text{strings}
+    \\
+    \\ 
+    % 
+    \EXPS & e & \Coloneqq  & \var{x} & \var{x} & \text{variable}
+    \\
+           &&& \enum{n} & n & \text{numeral}
+    \\
+           &&& \estr{s} & \litstr{s} & \text{literal}
+    \\
+           &&& \eplus{e_1}{e_2} & e_1 {+} e_2 & \text{addition}
+    \\
+           &&& \etimes{e_1}{e_2} & e_1 {*} e_2 & \text{multiplication}
+    \\
+           &&& \ecat{e_1}{e_2} & e_1 \concat e_2 & \text{concatenate}
+    \\
+           &&& \elen{e} & \lvert e \rvert & \text{length}
+    \\
+           &&& \elet{e_1}{x}{e_2} & \clet{e_1}{x}{e_2} & \text{definition}
+  \end{array}
+  \]
+\subsection{Typing rules}
+
+  \[
+  \tyrule
+  {\etyrulename{var}}
+  {\,}
+  {\tyjudge{\Gamma_1, \var{x}: \tau, \Gamma_2}{\var{x}}{\tau} }
+  \]
+  \[
+  \tyrule
+  {\etyrulename{str}}
+  {\,}
+  {\tyjudge{\Gamma}{\estr{s}}{\estr{}}}
+  \qquad\qquad\qquad
+  \tyrule
+  {\etyrulename{num}}
+  {\,}
+  {\tyjudge{\Gamma}{\enum{n}}{\enum{}}}
+  % \end{array}
+  \]
+  \[
+  \tyrule
+  {\etyrulename{plus}}
+  {
+    \tyjudge{\Gamma}{e_1}{\enum{}}
+    \and
+    \tyjudge{\Gamma}{e_2}{\enum{}}
+  }
+  {\tyjudge{\Gamma}{\eplus{e_1}{e_2}}{\enum{}}}
+  \qquad\qquad\qquad
+  \tyrule
+  {\etyrulename{times}}
+  {
+    \tyjudge{\Gamma}{e_1}{\enum{}}
+    \and
+    \tyjudge{\Gamma}{e_2}{\enum{}}
+  }
+  {\tyjudge{\Gamma}{\etimes{e_1}{e_2}}{\enum{}}}
+  % 
+  \]
+  \[
+  \tyrule
+  {\etyrulename{cat}}
+  {
+    \tyjudge{\Gamma}{e_1}{\estr{}}
+    \and
+    \tyjudge{\Gamma}{e_2}{\estr{}}
+  }
+  {\tyjudge{\Gamma}{\ecat{e_1}{e_2}}{\estr{}}}
+  \qquad\qquad\qquad
+  \tyrule
+  {\etyrulename{len}}
+  {
+    \tyjudge{\Gamma}{e}{\estr{}}
+  }
+  {\tyjudge{\Gamma}{\elen{e}}{\enum{}}}
+  \]
+  \[
+  \tyrule
+  {\etyrulename{let}}
+  {
+    \tyjudge{\Gamma}{e_1}{\tau_1}
+    \and
+    \tyjudge{\Gamma, \var{x} : \tau_1 }{e_2}{\tau}
+  }
+  {\tyjudge{\Gamma}{\elet{e_1}{x}{e_2}}{\tau}}
+  \]
+
+\section{Exercises}
+
+\subsection{Typing derivation}
+
+Perform the full typing derivation for the following $\lggeE$ programs:
+  \begin{itemize}
+  \item $\ecat
+    {\ecat
+      {\estr{\text{hello}}}   
+      {\estr{\text{world}}}
+    }
+    {\estr{\text{!}}}$ --- start with type $\estr{}$.
+    % 
+  \item $\etimes
+    {\elen{\estr{\text{hello}}}}
+    {\eplus{\enum{1}}{\elen{\estr{\text{world}}}}}$
+    --- start with type $\enum{}$.
+    % 
+  \item $\elet{\estr{\text{mystring}}}{x}{\etimes{\elen{\var{x}}}{\enum{0}}}$
+    --- start with type $\enum{}$.
+    % 
+  \item $\elet
+    {\estr{\text{anotherstring}}}
+    {y}
+    {\eplus{\var{y}}{\etimes{\enum{1}}{\enum{2}}}}$
+    --- start with type $\enum{}$.
+    % 
+  \item $\elet
+    {\ecat{\estr{\text{anotherstring}}}{\var{y}}}
+    {y}
+    {\var{y}}$
+    --- start with type $\estr{}$.
+  \end{itemize}
+
+
+  For instance, to check that program
+  $\elet{\enum{42}}{z}{\eplus{\var{z}}{1}}$ has type $\enum{}$, you
+  should construct the following tree (starting from the bottom,
+  applying the appropriate rule at each node of the tree):
+  
+  {\small
+  \[
+  \tyrule{\etyrulename{let}}
+  {
+    \tyrule{\etyrulename{num}}
+    {\,}
+    {
+      \tyjudge{\emptyset}
+      {\enum{42}}
+      {\enum{}}
+    }
+    \\
+    \qquad   \qquad
+    \tyrule{\etyrulename{plus}}
+    {
+      \tyrule{\etyrulename{var}}
+      {\,}
+      {
+        \tyjudge{\var{z} : \enum{}}
+        {\var{z}}
+        {\enum{}}
+      }
+      \\
+      \qquad   \qquad
+      \tyrule{\etyrulename{num}}
+      {\,}
+      {
+        \tyjudge{\var{z} : \enum{}}
+        {\enum{1}}
+        {\enum{}}
+      }
+    }
+    { 
+      \tyjudge{\var{z} : \enum{}}
+      {\eplus{\var{z}}{\enum{1}}}
+      {\enum{}}
+    }
+  }
+  {
+    \tyjudge{\emptyset}
+    {\elet{\enum{42}}{z}{\eplus{\var{z}}{\enum{1}}}}
+    {\enum{}}
+  }
+  \]
+  }
+
+\subsection{Language extension}
+
+Currently $\lggeE$ does not feature any conditional construct. What
+would you need to add to the language (in terms of syntax and typing
+rules) so that it supports a construct of the form:
+\[
+\csite{e}{e_1}{e_2}
+\]
+
+
+\section*{\LaTeX\ template}
+
+If you would like to use \LaTeX\ to typeset your solution, you can use
+the template here:
+\url{https://github.com/ukc-co663/pl-design-latex-template}.
+
+\end{document}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

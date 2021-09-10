@@ -1,0 +1,216 @@
+
+
+\section{Mutable variables}
+
+
+
+\begin{frame}
+  \frametitle{Introduction}
+
+  All the languages we have seen so far belong to the realm of
+  \emph{functional} programming language.
+  % 
+  In particular, in these languages variables are \emph{immutable}.
+
+  \bigskip
+
+  In this lecture, we study language $\lggeW$, a small \emph{imperative}
+  programming language with \emph{mutable} variables
+\end{frame}
+
+\begin{frame}
+  \frametitle{Language \lggeW}
+  % 
+  % 
+  Let $\VARS$ be a set of variables,
+  % 
+  $n \in \naturals$, $t \in \{\ktrue,\kfalse\}$, and $\var{x} \in \VARS$.
+  % 
+  \[
+  \begin{array}{llclll}
+    \AEXPS & a & \Coloneqq & n \bnfsep \var{x} \bnfsep a_1 + a_2 \bnfsep a_1 * a_2 
+    & \text{Arith.\ exp.\ } 
+    \\
+    \\
+    \BEXPS & b  & \Coloneqq 
+                           & t \bnfsep b_1 \land b_2 \bnfsep \neg b \bnfsep a_1 \leq a_2 
+    & \text{Bool.\ exp.\ }
+    \\
+    \\
+    \STMTS  & s & \Coloneqq & \sskip & \text{no nop}
+    \\
+           &&& {s_1 ; s_2} & \text{sequence}
+    \\
+           &&& \cset{x}{a} & \text{assign}
+    \\
+           &&&  \csite{b}{s_1}{s_2} & \text{if-then-else}
+    \\
+           &&&  \cwhile{b}{s} & \text{while}
+  \end{array}
+  \]
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Dynamics -- big step semantics}
+  % 
+  $\Sigma$ represents the memory, formally, it's a map
+  $\Sigma : \VARS \rightarrow \naturals$ from variable names to
+  (positive) integers.
+  % 
+  \[
+  \semrule
+  {}
+  {\,}
+  {\bsjudge{\wconf{\Sigma}{n}}{n}}
+  \qquad\qquad
+  \semrule
+  {}
+  {\,}
+  {\bsjudge{\wconf{\Sigma}{\var{x}}}{\Sigma(\var{x})}}
+  \]
+
+  \[
+  \semrule
+  {}
+  {
+    \bsjudge{\wconf{\Sigma}{a_1}}{n_1}
+    \and
+    \bsjudge{\wconf{\Sigma}{a_2}}{n_2}
+    \and
+    n_1 + n_2 = n
+  }
+  {\bsjudge{\wconf{\Sigma}{a_1 + a_2}}{n}}
+  \]
+
+  and similarly for other operators and for Boolean expressions.
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Dynamics -- sequencing}
+  \[
+  \semrule
+  {\wsemrulename{set}}
+  {\bsjudge{\wconf{\Sigma}{a}}{n}}
+  {
+    \jtrans
+    {\wconf{\Sigma}{\cset{x}{a}}}
+    {\wconf{\upmap{\Sigma}{x}{n}}{\sskip}}
+  }
+  \]
+
+  \[
+  \semrule
+  {\wsemrulename{skip}}
+  {\,}
+  {
+    \jtrans
+    {\wconf{\Sigma}{\sskip ; s}}
+    {\wconf{\Sigma}{s}}
+  }
+  \]
+  
+  \[
+  \semrule
+  {\wsemrulename{seq}}
+  { \jtrans
+    {\wconf{\Sigma}{s_1}}
+    {\wconf{\Sigma}{s'_1}}
+  }
+  {
+    \jtrans
+    {\wconf{\Sigma}{s_1 ; s_2}}
+    {\wconf{\Sigma}{s'_1 ; s_2}}
+  }
+  \]
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Dynamics}
+  \[
+  \semrule
+  {\wsemrulename{ift}}
+  {\bsjudge{\wconf{\Sigma}{b}}{\ktrue}}
+  {
+    \jtrans
+    {\wconf{\Sigma}{\csite{b}{s_1}{s_2}}}
+    {\wconf{\Sigma}{s_1}}
+  }
+  \]
+
+  \[
+  \semrule
+  {\wsemrulename{iff}}
+  {\bsjudge{\wconf{\Sigma}{b}}{\kfalse}}
+  {
+    \jtrans
+    {\wconf{\Sigma}{\csite{b}{s_1}{s_2}}}
+    {\wconf{\Sigma}{s_2}}
+  }
+  \]
+
+  % 
+  \[
+  \hspace{0.5cm}
+  \semrule
+  {\wsemrulename{w}}
+  {\,}
+  {
+    \jtrans
+    {\wconf{\Sigma}{\cwhile{b}{s}}}
+    {\wconf{\Sigma}{
+        \csite
+        {b}
+        {(s; \cwhile{b}{s})}
+        {\sskip}
+      }
+    }
+  }
+  \]
+  
+
+\end{frame}
+
+% \begin{frame}
+%   \frametitle{Statics}
+%   \[
+%   \tyrule
+%   {\wtyrulename{e}}
+%   {\,}
+%   {\wejudge{\Gamma}{\Sigma}{\ebool{\ktrue}}{\ebool{}}}
+%   \]
+
+
+% \[
+% \tyrule
+% {\wtyrulename{skip}}
+% {\,}
+% {\wsjudge{\Gamma}{\Sigma}{\sskip}}
+% \]
+
+%   \[
+%   \tyrule
+%   {\wtyrulename{ite}}
+%   {
+%     \wejudge{\Gamma}{\Sigma}{e}{\ebool{}}
+%     \and
+%     \wsjudge{\Gamma}{\Sigma}{s_1}
+%     \and
+%     \wsjudge{\Gamma}{\Sigma}{s_2}
+%   }
+%   {
+%     \wsjudge{\Gamma}{\Sigma}{\site{e}{s_1}{s_2}}
+%   }
+%   \]
+% \end{frame}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

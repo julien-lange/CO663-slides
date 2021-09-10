@@ -1,0 +1,334 @@
+\section{Polymorphism}
+
+\begin{frame}[fragile,fragile]
+  \frametitle{Introduction}
+  Take a language such as $\lggeEF$ with base types $\enum{}$ and
+  $\estr{}$ and product types.
+  
+  Can we define \emph{one} function which takes a triple (e.g.,
+  $\cpair{a}{\cpair{b}{c}}$) and returns the middle element (i.e., $b$)?
+
+  % \bigskip
+
+  \[
+  \elam{\typrod{\enum{}}{\typrod{\enum{}}{\enum{}}}}{x}{ \eprl{\eprr{\var x}}}
+  \]
+  
+  \begin{lstlisting}[language=Haskell]
+-- Haskell
+middle :: (t1,(t2,t3)) -> t2
+middle (x,(y,z)) = y
+\end{lstlisting}
+  
+\begin{lstlisting}[language=Java]
+// Java
+// (assume class Pair<T, V> exists)
+public <S> S getMiddle(Pair<T,Pair<S,V>> triple){
+  return triple.getRight().getLeft();
+}
+\end{lstlisting}
+
+\bigskip
+  
+  More examples?
+  
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Polymorphicity}
+  \begin{itemize}
+  \item The term \emph{polymorphism} refers to a range of language mechanisms
+    that allow a single part of a program to be used with different
+    types in different contexts.
+    % 
+  \item The languages we have considered so far are all
+    \emph{monomorphic} in that every expression has at most \emph{one}
+    type (given the types of its free variables).
+    % 
+  \item \emph{Overloading} is a form of ``ad-hoc polymorphism''. It
+    associates a single function symbol with many implementations.
+    The compiler chooses an appropriate implementation for each
+    application of the function, based on the types of the arguments.
+  \end{itemize}
+\end{frame}
+
+\subsection{Syntax}
+
+\begin{frame}
+  \frametitle{Language $\lggeF$}
+  \[
+  \begin{array}{llclll}
+    \TYPES & \tau & \Coloneqq & \tvar{t} & \tvar{t} & \text{type variable}
+    \\ 
+           &&& \tyarr{\tau_1}{\tau_2}  & \tau_1 \rightarrow \tau_2 & \text{function}
+    \\
+           &&& \tyall{t}{\tau} & \ctyall{t}{\tau} & \text{polymorphic}
+    \\
+    \\
+    \EXPS & e & \Coloneqq & \var{x} & \var{x} & \text{variable}
+    \\
+           &&& \elam{\tau}{x}{e} & \clam{\tau}{x}{e} & \text{abstraction}
+    \\
+           &&& \eapp{e_1}{e_2} & \capp{e_1}{e_2} & \text{application}
+    \\
+           &&& \eLAM{t}{e} & \cLAM{t}{e} & \text{type abstraction}
+    \\
+           &&& \eAPP{\tau}{e} & \cAPP{\tau}{e} & \text{type application}
+  \end{array}
+  \]
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Exercises}
+  \begin{itemize}
+  \item Define the identify function ($\texttt{id}(x) = x$)
+  \item Define a polymorphic function to compose function together ($f \circ g = f(g(x))$)
+  \item Any more ``standard'' polymorphic functions?
+  \end{itemize}
+\end{frame}
+
+% L(T) . \x:t . x
+% L(T1) . L(T2) . L(T2) \f:T2->T3 \g:T1->T2 = f(g(x))
+
+
+\subsection{Statics}
+
+\begin{frame}
+  \frametitle{Judgements}
+
+  Two judgement forms and two kinds of environments, the hypotheses in
+  $\Delta$ have the form $\tvar{t} \ \typeok$, where $\tvar{t}$ is a
+  variable of sort $\TYPES$ and the hypotheses in $\Gamma$ have the
+  form $\var{x} : \tau$, where $\var{x}$ is a variable of sort $\EXPS$.
+
+  \bigskip
+
+  \begin{itemize}
+  \item   {\Huge
+      $    
+      {\typejudge{\Delta}{\tau}}
+      $   
+    }
+
+    says that the type $\tau$ is well-formed, under the hypotheses in $\Delta$
+
+    \bigskip
+
+  \item   {\Huge
+      $    
+      {\tyFjudge{\Delta}{\Gamma}{e}{\tau}}
+      $   
+    }
+    
+    says that the expression $e$ has type $\tau$, under  the hypotheses in $\Delta$ and $\Gamma$
+  \end{itemize}
+\end{frame}
+
+
+
+\note{As usual, we write $\varnothing$ for the empty context $\Delta$ or $\Gamma$}
+
+
+\begin{frame}
+  \frametitle{Well-formed types}
+ \[
+  \tyrule
+  {}
+  {\,}
+  {\typejudge{\Delta, \tvar{t} \ \typeok , \Delta_2}{\tvar{t}} }
+  \]
+
+  
+  \[
+  \tyrule
+  {}
+  {
+    \typejudge{\Delta}{\tau_1}
+    \and
+    \typejudge{\Delta}{\tau_2}
+  }
+  {\typejudge{\Delta}{\tyarr{\tau_1}{\tau_2}} }
+  \]
+
+  
+  \[
+  \tyrule
+  {}
+  {
+    \typejudge{\Delta, \tvar{t} \ \typeok }{\tau}
+  }
+  {\typejudge{\Delta}{\tyall{t}{\tau}} }
+  \]
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Examples}
+  Are these types well-formed?
+  \begin{itemize}
+  \item $\tyall{t}{\tyarr{\tvar t}{\tvar t}}$
+  \item $\tyall{t_1}{\tyall{t_2}{\tvar{t_1}}}$
+  \item $\tyall{t_1}{\tyall{t_2}{\tyarr{\tvar{t_2}}{\tvar{t_1}}}}$
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Typing judgements (1)}
+  \[
+  \tyrule
+  {\ftyrulename{var}}
+  {\,}
+  {\tyFjudge{\Delta}{\Gamma_1, \var{x}: \tau, \Gamma_2 }{\var{x}}{\tau} }
+  \]
+
+
+  \[
+  \tyrule
+  {\ftyrulename{lam}}
+  {\tyFjudge{\Delta}{\Gamma, \var{x} : \tau_1}{e}{\tau_2}}
+  {\tyFjudge{\Delta}{\Gamma}{\elam{\tau_1}{x}{e}}{\tyarr{\tau_1}{\tau_2}}}
+  \]
+
+  \[
+  \tyrule
+  {\ftyrulename{ap}}
+  {
+    \tyFjudge{\Delta}{\Gamma}{e_1}{\tyarr{\tau_1}{\tau_2}}
+    \and
+    \tyFjudge{\Delta}{\Gamma}{e_2}{\tau_2}
+  }
+  {
+    \tyFjudge{\Delta}{\Gamma}{\eapp{e_1}{e_2}}{\tau_2}
+  }
+  \]
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Typing judgements (2)}
+  
+
+  \[
+  \tyrule
+  {\ftyrulename{tlam}}
+  {\tyFjudge{\Delta, \tvar{t} \ \typeok}{\Gamma}{e}{\tau}}
+  {
+    \tyFjudge{\Delta}{\Gamma}{\eLAM{t}{e}}{\tyall{t}{\tau}}
+  }
+  \]
+
+
+  \[
+  \tyrule
+  {\ftyrulename{tap}}
+  {
+    \typejudge{\Delta}{\tau}
+    \and
+    \tyFjudge{\Delta}{\Gamma}{e}{\tyall{t}{\tau'}}
+  }
+  {
+    \tyFjudge{\Delta}{\Gamma}{\eAPP{\tau}{e}}{\tsubs{\tau'}{\tau}{t}}
+  }
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Examples}
+  Assuming we have product types, do these expression have a type?
+  \begin{itemize}
+  \item $\eLAM{t}{\elam{\tvar{t}}{x}{\var x}}$
+  \item $\eLAM{t}{\elam{\typrod{\tvar{t}}{\typrod{\tvar{t}}{\tvar{t}}}}{x}{ \eprl{\eprr{\var x}}}}$
+  \item Check for the solution of $f \circ g$
+  \end{itemize}
+\end{frame}
+
+% let as lambda => (\id . <id "hello", id 123>) (\x . x)
+
+
+\subsection{Semantics}
+
+\begin{frame}
+  \frametitle{Dynamics}
+  \textbf{Call-by-name} semantics
+  \[
+  \semrule
+  {\fsemrulename{lam}}
+  {\,}
+  {\valjudge{\elam{\tau}{x}{e}}}
+  \]
+
+  \[
+  \semrule
+  {\fsemrulename{tlam}}
+  {\,}
+  {\valjudge{\eLAM{t}{e}}}
+  \]
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Dynamics}
+  \[
+  \semrule
+  {\fsemrulename{ap}}
+  {\jtrans{e_1}{e'_1}}
+  {
+    \jtrans{\eapp{e_1}{e_2}}{\eapp{e'_1}{e_2}}
+  }
+  \]
+
+  \[
+  \semrule
+  {\fsemrulename{lav}}
+  {\,}
+  {\jtrans{\eapp{\elam{\tau}{x}{e_1}}{e_2}}{\subs{e_1}{e_2}{x}}}
+  \]
+\end{frame}
+
+
+
+
+\begin{frame}
+  \frametitle{Dynamics}
+  \[
+  \semrule
+  {\fsemrulename{ap}}
+  {\,}
+  {
+    \jtrans
+    {\eAPP{\tau}{\eLAM{t}{e}}}
+    {\tsubs{e}{\tau}{t}}
+  }
+  \]
+
+  \[
+  \semrule
+  {\fsemrulename{lav}}
+  {\jtrans{e}{e'}}
+  {
+    \jtrans
+    {\eAPP{\tau}{e}}
+    {\eAPP{\tau}{e'}}
+  }
+  \]
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Expressivity of $\lggeF$}
+  Product and sum type can be expressed with the construct
+  of $\lggeF$!
+  %
+  See Chapter 16.2 of PFPL.
+\end{frame}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

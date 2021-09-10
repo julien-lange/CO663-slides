@@ -1,0 +1,32 @@
+  \[
+  \begin{array}{llclll}
+    \TYPES & \tau & \Coloneqq & \enum{}  & \enum{} & \text{numbers}
+    \\
+           &&& \estr{} & \estr{} & \text{strings}
+    \\
+    \\  \pause
+    % 
+    \EXPS & e & \Coloneqq  & \var{x} & \var{x} & \text{variable}
+    \\
+           &&& \enum{n} & n & \text{numeral}
+    \\
+           &&& \estr{s} & \litstr{s} & \text{literal}
+    \\
+           &&& \eplus{e_1}{e_2} & e_1 {+} e_2 & \text{addition}
+    \\
+           &&& \etimes{e_1}{e_2} & e_1 {*} e_2 & \text{multiplication}
+    \\
+           &&& \ecat{e_1}{e_2} & e_1 \concat e_2 & \text{concatenate}
+    \\
+           &&& \elen{e} & \lvert e \rvert & \text{length}
+    \\
+           &&& \elet{e_1}{x}{e_2} & \clet{e_1}{x}{e_2} & \text{definition}
+  \end{array}
+  \]
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

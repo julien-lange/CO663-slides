@@ -1,0 +1,376 @@
+\section{Introduction}
+
+
+
+\begin{frame}
+  \frametitle{Introduction}
+  \begin{quotation}
+    \Large
+    A good language is one people use.
+  \end{quotation}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Language rankings}
+
+  \begin{itemize}[<+->]
+  \item \textbf{Popularity:} \url{http://www.tiobe.com/tiobe-index}
+    (search engine queries containing the name of the language)
+    %
+    % 
+  \item \textbf{Popularity:} \url{http://pypl.github.io/PYPL.html} (queries for language tutorials on Google)
+    %
+  \item \textbf{Interest:}
+    \url{https://insights.stackoverflow.com/survey/2019\#most-loved-dreaded-and-wanted}
+  \item \textbf{Usage:} % \url{https://octoverse.github.com/projects\#languages} 
+    \url{https://www.benfrederickson.com/ranking-programming-languages-by-github-users}
+    (number of contributors)
+    % 
+  \item \textbf{Salaries:}
+    \url{https://insights.stackoverflow.com/survey/2019\#top-paying-technologies}
+  \end{itemize}
+  \pause 
+  More GitHub data: \url{https://githut.info}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Some a features of a good language}
+  \begin{itemize}
+  \item Readability (elegant syntax)
+  \item Simplicity (clean, orthogonal constructs)
+  \item \textbf{Safety} (programs won't go wrong)
+  \item Support for programming in the large (modularity)
+  \item Efficiency (good execution model and tools)
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Tensions in PL design}
+  Sometimes these goals are conflicting:
+  \begin{itemize}
+  \item Types provide safety but might restrict expressiveness.
+  \item Safety check (e.g., array out of bound checks) might affect
+    run-time performances.
+  \end{itemize}
+
+  \bigskip
+  
+  A lot of research in PL is about trying to achieve these goals while
+  appeasing these conflicts.
+\end{frame}
+
+
+
+
+\begin{frame}
+  \frametitle{Introduction}
+  \begin{itemize}
+  \item Why learn the principles of language design?
+    % 
+  \item What is the difference between language \emph{design} and \emph{implementation}?
+    % 
+  \item In what sort of situation would you have to define \emph{your own
+    language}?
+    % 
+  \item What would you have to think of when \emph{designing} your
+    own language?
+  \end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}
+  \frametitle{Example of balance in PL: Rust}
+ 
+  \begin{itemize}
+  \item Improve safety guarantees by preventing concurrent threads to
+    share memory.
+  \item Improve runtime performance by avoiding the need for a garbage
+    collector.
+  \item All this was largely inspired by research in programming languages.
+  \end{itemize}
+
+  \bigskip
+  \pause
+  What is the cost of these features?
+  
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Example: modernisation of languages}
+  \begin{itemize}[<+->]
+  \item \textbf{\href{https://www.typescriptlang.org/}{TypeScript}}: superset
+    of JavaScript with (optional) type annotation --- started at Microsoft.
+    % 
+  \item \textbf{\href{https://hacklang.org/}{Hack}}: dialect of PHP with type
+    annotation (gradual types) --- started at Facebook.
+    %
+  \item WhatsApp/Facebook have similar plans for Erlang \ldots
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Programming language design: examples}
+
+  \begin{itemize}
+  \item \href{https://dl.acm.org/citation.cfm?id=2984004}{Java and
+      scala's type systems are unsound: the existential crisis of null
+      pointers} (Nada Amin and Ross Tate).
+    % 
+  \item \href{https://dl.acm.org/citation.cfm?id=3009871}{Java generics are turing complete} (Radu Grigore).
+    % 
+  \item The Go community is currently attempting to add
+    \textbf{generics} in Go. See the
+    \href{https://go.googlesource.com/proposal/+/master/design/go2draft-generics-overview.md}{description of the problem}
+    and the
+    \href{https://go.googlesource.com/proposal/+/master/design/go2draft-contracts.md}{draft
+      design}.
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}% [allowframebreaks]
+  \frametitle{Programming language (PL): definitions}
+  
+  \begin{itemize}
+  \item A PL is a system of notation for describing computations. A
+    useful PL must therefore be suited for both
+    \emph{describing} (i.e., for human writers and readers of
+    programs), and for \emph{computation} (i.e., for efficient
+    implementation on computers). [R.D. Tennent, 1985]
+
+  \item PLs \textbf{express computations} in a form comprehensible to both
+    people and machines. [R. Harper, 2014]
+
+  \item A PL is a formal language that specifies a set of instructions
+    that can be used to produce various kinds of output. PLs generally
+    consist of instructions for a computer. PLs can be used to create
+    programs that implement specific algorithms. [Wikipedia, 2019]
+  \end{itemize}  
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Syntax, types, and semantics}
+  \begin{aquote}{R. Harper}
+    \emph{Types} are the central organizing principle of the theory of
+    programming languages.
+    % 
+    Language features are manifestations of \emph{type structure}. The
+    \emph{syntax} of a language is governed by the constructs that
+    define its types, and its \emph{semantics} is determined by the
+    interactions among those constructs. The \emph{soundness of a
+      language} design (the absence of ill-defined programs) follows
+    naturally.
+  \end{aquote}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Syntax, types, and semantics}
+  A programming language is described by
+  \begin{itemize}
+  \item its \emph{syntax} of programs (what is a term of the language),
+    % 
+  \item its \emph{semantics}, i.e., the meaning of programs, how
+    programs are evaluated, how they behave,
+    % 
+  \item its \emph{type system}, i.e., the (context sensitive)
+    constraints on the formation of program phrases.
+  \end{itemize}
+
+  \bigskip Where do you find the semantics of your favourite programming
+  language? How is it defined?
+\end{frame}
+
+
+
+
+
+
+
+
+% \note{
+%   \frametitle{Goals}
+%   \begin{itemize}
+%   \item Knowledge: what is a programming language, what is type safety, semantics, type systems, etc
+%   \item Do
+%     \begin{itemize}
+%     \item Augment a simple language with simple language constructs
+%       (e.g., if then else, new data types) and preserve type safety
+%     \item Apply capture avoiding substitution
+%     \item Given a set of semantics rules, be able to show the reduction
+%     \end{itemize}
+%   \end{itemize}
+% }
+
+
+% \begin{frame}
+%   \frametitle{Objectives of Part II}
+%   \begin{itemize}
+%   \item Techniques for modeling programs/languages mathematically
+%   \item To learn a comprehensive framework for formulating and
+%     analysing a broad range of ideas in PLs
+%     % 
+%   \item Language features are manifestations of type structures
+%     % 
+%   \end{itemize}
+% \end{frame}
+
+
+% \note{
+% %\begin{frame}
+%   \frametitle{Languages}
+%   \begin{itemize}
+%   \item Java (OO?)
+%   \item Rust (affine?)
+%   \item Haskell (start? HO function)
+%   \item Python (dynamic typing)
+%   \item OCaml (mix of Java and Haskell?)
+%   \end{itemize}
+%   Maybe spent one lecture explaining proof by induction and a couple
+%   of examples? (possibly state to be non-examinable)
+% %\end{frame}
+% }
+
+
+
+\begin{frame}
+  \frametitle{Main textbook}
+
+  This part of the course follows loosely, ``\emph{Practical Foundations for
+  Programming Languages}'' [PFPL] (Second Edition) by Robert Harper.
+
+  \bigskip
+
+  \begin{tabular}[t]{cc}
+    \includegraphics[width=0.4\textwidth]{harper.jpg}
+    &
+     \begin{tabular}[t]{l}
+       Available in the library.
+     \end{tabular} 
+  \end{tabular}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Other references}
+  Other useful references:
+  \begin{itemize}
+  \item \emph{Types and Programming Languages} [TAPL], by Benjamin C. Pierce
+    (available in the library)
+    % 
+  \item \emph{Programming Languages: Application and Interpretation},
+    by Shriram Krishnamurthi (available
+    \href{http://cs.brown.edu/~sk/Publications/Books/ProgLangs/}{online})
+    % 
+  \item \emph{Advanced Topics in Types and Programming Languages} [ATTAPL],
+    edited by Benjamin C. Pierce (available in the library)
+    % 
+  \item \emph{Introduction to Lambda Calculus}, by Henk Barendregt and Erik Barendsen
+    (available \href{http://www.nyu.edu/projects/barker/Lambda/barendregt.94.pdf}{online})
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{A selection of PL talks}
+  \begin{itemize}
+  \item \href{https://www.youtube.com/watch?v=06x8Wf2r2Mc}{A History
+      of Haskell: being lazy with class} by Simon Peyton Jones (Microsoft/Haskell)
+  \item \href{https://www.youtube.com/watch?v=5kj5ApnhPAE}{Public Static Void} by Rob Pike (Google/Go)
+  \item \href{https://www.youtube.com/watch?v=O5vzLKg7y-k}{The Rust Programming Language} by Aaron Turon (Mozilla/Rust)
+  \item \href{https://www.youtube.com/watch?v=60nXRNjEeo4}{The
+      Challenges of Creating a Programming Language} Martin Odersky
+    (EPFL/Scala)
+  \item \href{https://www.youtube.com/watch?v=9lWrt6H6UdE}{What's Different In Dotty} by Martin Odersky (EPFL/Scala)
+  \item \href{https://www.youtube.com/watch?v=xc72SYVU2QY}{Move Fast to Fix More Things} by Peter O'Hearn (UCL/Facebook)
+  \item \href{https://www.youtube.com/watch?v=RoqDQgzwO00}{Gradual Typing (Lecture 1 from OPLSS'17)} by Ron Garcia (UBC)
+  \item \href{https://www.youtube.com/watch?v=8Xyk_dGcAwk}{The Type Soundness Theorem That You Really Want to Prove (and now you can)} by Derek Dreyer
+  \end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}
+  \frametitle{Assignment \#2: paper presentations}
+  
+  \begin{enumerate}
+  \item Choose \emph{one} paper from list on the
+    \href{https://rgrig.github.io/plad/essay.html}{course website} and
+    form a group of three. Use \href{https://piazza.com}{piazza}!
+
+  \item We will allow at most \textbf{one group per paper}.
+    % \begin{enumerate}
+    % \item \href{https://www.cis.upenn.edu/~bcpierce/papers/fj-toplas.pdf}{Featherweight Java}
+    % \item \href{https://dl.acm.org/citation.cfm?id=2951945}{Disjoint intersection types}
+    % \item \href{http://ecee.colorado.edu/~siek/pubs/pubs/2006/siek06:_gradual.pdf}{Gradual Typing for Functional Languages}
+    % \item \href{https://lirias.kuleuven.be/bitstream/123456789/203434/1/ownership.ps}{Ownership types for flexible alias protection}
+    % \item \href{https://dl.acm.org/citation.cfm?id=113468}{Refinement types for ML}
+    % \item \href{https://www.cs.cornell.edu/andru/papers/popl99/popl99.pdf}{JFlow: Practical Mostly-Static Information Flow Control}
+ 
+    % \item \href{http://homepages.inf.ed.ac.uk/wadler/papers/need-journal/need-journal.ps}{The Call-by-Need Lambda Calculus}
+      
+
+    % \item \href{https://doi.org/10.1109/LICS.1993.287570}{Typing and Subtyping for Mobile Processes}
+    % \end{enumerate}
+  \item Announce which paper you've chosen (to me
+    \href{mailto:j.s.lange@kent.ac.uk}{j.s.lange@kent.ac.uk})
+    \emph{before} Friday Week 20, 4pm.
+    % 
+  \item Read and understand the paper, then \emph{prepare a presentation} for it
+    (cover at least types, semantics, and some results)
+    % 
+  \item \emph{Present} the paper in groups in Weeks 23 \& 24.
+    % 
+  \item Submit your slides via Moodle \textbf{before} your presentation.
+    % 
+    % \item Submit your supporting material (notes, slides, etc) by Friday Week 22.
+  % \item \emph{Present} the paper. Bring your supporting
+  %   material.
+  \end{enumerate}
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Remarks re:\ paper reading}
+  \begin{itemize}
+  \item Some tips:
+    \begin{itemize}
+    \item \href{https://blog.acolyer.org/2018/01/26/a-practitioners-guide-to-reading-programming-languages-papers/}{The Morning Paper}
+    \end{itemize}
+  \item What is \emph{more important}:
+    \begin{itemize}
+    \item To be able to summarise the overall contribution of the paper
+    \item To understand semantics and type systems
+    \item To be able to explain the main result of the approach (pros and cons)
+    \end{itemize}
+  \item What is \emph{less important}:
+    \begin{itemize}
+    \item Algorithmic aspects
+    \item Proofs
+    \end{itemize}
+  \item Short paper $\neq$ easy paper. If you choose a long
+    paper, you can decide to focus your summary/presentation on part
+    of it.
+  \item Feel free to use additional material (other papers, tutorials, lectures, etc).
+  \end{itemize}
+
+  \bigskip
+
+  \emph{Ask if in doubt!}
+\end{frame}
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:

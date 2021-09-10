@@ -1,0 +1,400 @@
+\section{Higher-order functions}
+
+
+
+\begin{frame}{Remember $\lggeE$?}
+  \input{language-e-syntax} 
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Introduction}
+  In $\lggeE$, to multiply a number by $2$, we can write:
+  \[
+  \clet{4}{x}{\etimes{\enum{2}}{\enum{x}}}
+  \]
+  whenever we want to double a number with have to ``redefine''
+  the concept of doubling.
+
+
+  \bigskip
+
+  What if I don't want to write the concept of ``doubling'' several times in, e.g.,
+  $(10\times2)+(4\times2)+(5\times2)$?
+  
+  \bigskip
+
+  \pause
+
+  \bigskip
+
+  What concept(s) are we missing?
+\end{frame}
+
+
+
+\subsection{Syntax and types}
+
+\begin{frame}[fragile]
+  \frametitle{Language $\lggeEF$}
+
+  \pause
+
+  \[
+  \begin{array}{llclll}
+    \TYPES & \tau & \Coloneqq & \ldots {\color{gray} (\text{as in } \lggeE)}
+    \\ 
+           &&& \tyarr{\tau_1}{\tau_2}  & \tau_1 \rightarrow \tau_2 & \text{function}
+    \\ 
+    \\\pause
+    \EXPS & e & \Coloneqq & \ldots {\color{gray} (\text{as in } \lggeE)}
+    \\
+           &&& \elam{\tau}{x}{e} & \clam{\tau}{x}{e} & \text{abstraction}
+    \\
+           &&& \eapp{e_1}{e_2} & \capp{e_1}{e_2} & \text{application}
+  \end{array}
+  \]
+
+  \bigskip
+  \pause
+
+  In other programming languages:
+\begin{lstlisting}
+  (Object x) -> x.getClass() // Java
+
+  \x -> x + 1                -- Haskell
+\end{lstlisting}
+
+  \pause
+
+  \[
+  \quad
+  \begin{array}{ll}
+    \text{Example:} \quad &
+                            \cleta{\clam{\enum{}}{x}{\etimes{\var{x}}{\enum{2}}}}{double}
+    \\
+                          & 
+                            \quad
+                            \cletb
+                            { 
+                            \eplus{
+                            \capp{\var{double}}{\enum{4}} 
+                            }
+                            {
+                            \capp{\var{double}}{{\enum{10}}} 
+                            }
+                            }
+  \end{array}
+  \]
+\end{frame}
+
+
+
+
+\begin{frame}
+  \frametitle{Statics}
+  \[
+  \tyrule
+  {\eftyrulename{lam}}
+  {
+    \only<2->{
+      \tyjudge{\Gamma, \var{x} : \tau_1}{e}{\tau_2}
+    }
+  }
+  {\tyjudge{\Gamma}{\elam{\tau_1}{x}{e}}{\tyarr{\tau_1}{\tau_2}}}
+  \]
+
+  
+  \bigskip
+
+
+  \pause
+
+  \pause
+  
+  \[
+  \tyrule
+  {\eftyrulename{ap}}
+  {
+    \only<4->{
+      \tyjudge{\Gamma}{e_1}{\tyarr{\tau'}{\tau}}
+    \and
+      \tyjudge{\Gamma}{e_2}{\tau'}
+    }
+  }
+  {
+    \tyjudge{\Gamma}{\eapp{e_1}{e_2}}{\tau}
+  }
+  \]
+
+\end{frame}
+
+
+\subsection{Semantics}
+
+
+
+\begin{frame}
+  \frametitle{Examples}
+  \label{fr:ef-types}
+  Are these $\lggeEF$ programs well typed?
+
+
+  {\footnotesize
+    \begin{itemize}[<+->]
+    \item $\elet{\clam{\enum{}}{x}{\etimes{\var{x}}{\var{x}}}}{sq}
+      { 
+        \eplus{
+          \eapp{\var{sq}}{4} 
+        }
+        {
+          \eapp{\var{sq}}{10} 
+        }
+      }$
+      % 
+    \item { $\elet{\clam{\enum{}}{x}{
+            \clam{\enum{}}{y}{
+              \etimes{\var x}{\var y}
+            }
+          }
+        }{f}{
+          \eapp
+          {\eapp
+            {\var{f}}
+            {\enum{4}}
+          }
+          {\enum{4}}
+        }
+        $}
+      
+    \item $\elet{\clam{\enum{}}{x}{
+          \eapp{\var f}{\eplus{\var{x}}{\enum{1}}}
+        }
+      }{f}{
+        \eapp{\var{f}}{0}
+      }$ 
+    \end{itemize}
+  }
+
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Dynamics}
+
+  First: define what a value is
+  \pause
+
+  \bigskip 
+  \[
+  \semrule
+  {\efsemrulename{lam}}
+  {\,}
+  {\valjudge{\elam{\tau}{x}{e}}}
+  \]
+  
+  \bigskip 
+  \pause
+  Second: define evaluation judgements
+  \pause
+
+  \[
+  \semrule
+  {\efsemrulename{ap}}
+  {\jtrans{e_1}{e'_1}}
+  {
+    \jtrans{\eapp{e_1}{e_2}}{\eapp{e'_1}{e_2}}
+  }
+  \]
+
+  \bigskip
+
+  \pause
+
+  \bigskip  
+
+  We write $\jtransC{e_1}{e_n}$ if $\jtrans{e_1}{e_2}$,
+  $\jtrans{e_2}{e_3}$, \ldots, $\jtrans{e_{n-1}}{e_n}$ for some
+  terms $e_1$, \ldots, $e_{n-1}$.
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Dynamics}
+
+  \begin{itemize}[<+->]
+  \item Call-by-name
+    \[
+    \semrule
+    {\efsemrulename{apn}}
+    {\,}
+    {\jtrans{\eapp{\elam{\tau}{x}{e_1}}{e_2}}{\subs{e_1}{e_2}{x}}}
+    \]
+    % 
+  \item Call-by-value
+
+    \[
+    \semrule
+    {\efsemrulename{apr}}
+    {\valjudge{e_1} 
+      \and \jtrans{e_2}{e'_2}
+    }
+    {\jtrans{\eapp{e_1}{e_2}}{\eapp{e_1}{e'_2}}}
+    \]
+
+    
+    \[
+    \semrule
+    {\efsemrulename{apl}}
+    {\valjudge{e_2}}
+    {\jtrans{\eapp{\elam{\tau}{x}{e_1}}{e_2}}{\subs{e_1}{e_2}{x}}}
+    \]
+  \end{itemize}
+
+  \bigskip
+  % 
+
+  What are the differences between call-by-name and call-by-value?
+\end{frame}
+
+\begin{frame}
+  \frametitle{Examples}
+  \label{fr:evaluate-ef}
+  Reduce the following expression (if they are typeable!):
+
+  {\footnotesize
+    \begin{itemize}[<+->]
+    \item $\elet{\clam{\enum{}}{x}{\etimes{\var{x}}{\var{x}}}}{sq}
+      { 
+        \eplus{
+          \eapp{\var{sq}}{4} 
+        }
+        {
+          \eapp{\var{sq}}{10} 
+        }
+      }$
+      % 
+    \item $\elet{\clam{\enum{}}{x}{
+          \clam{\enum{}}{y}{
+            \etimes{\var x}{\var y}
+          }
+        }
+      }{f}{
+        \eapp
+        {\var f}
+        {\eapp
+          {\enum{4}}
+          {\enum{3}}
+        }
+      }$
+      
+    \item $\elet{\clam{\enum{}}{x}{
+          \eapp{\var f}{\eplus{\var{x}}{\enum{1}}}
+        }
+      }{f}{
+        \eapp{\var{f}}{0}
+      }$ 
+    \end{itemize}
+  }
+
+  \bigskip 
+
+
+
+
+\end{frame}
+
+
+
+
+\begin{frame}{Other examples}
+  \label{fr:notype-ef}
+
+  Type check then evaluate the following terms:
+  % 
+  % 
+  \begin{itemize}
+  \item {\small $ \eapp{
+      \eapp{{\elam{\enum{}}{x}{\elam{\enum{}}{y}{\eplus{\var{x}}{\var{y}}}}}}
+      {\enum{1}}
+    }{\enum{2}}
+    $}
+    % 
+  \item $\eapp
+    {\elam{\tau}{x}{\eapp
+        {\var{x}}
+        {\var{x}}}
+    }
+    {\enum{2}}$
+    % 
+  \item $\eapp
+    {\elam{\tau}{x}{\eapp
+        {\var{x}}
+        {\var{x}}}
+    }
+    {\elam{\tau'}{x}{\eapp
+        {\var{x}}
+        {\var{x}}}
+    }$
+    % 
+  \end{itemize}
+
+  \bigskip
+
+  The same programs in concrete syntax:
+  \begin{itemize}
+  \item  $
+    \capp{
+      \capp{{\clam{\enum{}}{x}{\clam{\enum{}}{y}{{\var{x}+\var{y}}}}}}
+      {\enum{1}}
+    }{\enum{2}}
+    $
+  \item $\capp
+    {\clam{\tau}{x}{\capp
+        {\var{x}}
+        {\var{x}}}
+    }
+    {\enum{2}}$
+    % 
+      \item $\capp
+    {\clam{\tau}{x}{\capp
+        {\var{x}}
+        {\var{x}}}
+    }
+    {\clam{\tau'}{x}{\capp
+        {\var{x}}
+        {\var{x}}}
+    }$
+    % 
+  \end{itemize}
+
+  % 
+  
+\end{frame}
+
+
+\begin{frame}
+  \label{fr:eval-strat-ef}
+  \frametitle{Evaluation strategies}
+  Remember the difference between \emph{call-by-name} vs \emph{call-by-value} evaluations?
+  
+  \bigskip
+
+  \begin{itemize}
+  \item $\eapp{\elam{\enum{}}{x}{\eplus{\var{x}}{\var{x}}}}{e}$
+    % $(\lambda \var{x} . \ \var{x} + \var{x}) \ e$
+  \item $\eapp{\elam{\enum{}}{x}{\enum{42}}}{e}$
+    
+  \end{itemize}
+
+  \bigskip
+
+  Which evaluation strategy is the best for these terms?
+
+\end{frame}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "main"
+%%% End:
